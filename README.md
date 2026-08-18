@@ -1,80 +1,85 @@
-# wellagent-core
+<div align="center">
+  
+# 🧠 wellagent-core
 
-`wellagent-core` is the architectural source of truth for composing an agent-oriented application. It contains no Electron bootstrap, UI, deployment setup, user database, or automatic plugin/process loading. It is purely the headless engine for orchestrating AI agents, tools, and memory.
+**The headless architectural source of truth for composing agent-oriented applications.**
 
-## Installation
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue?logo=typescript)](#)
+
+</div>
+
+<br />
+
+`wellagent-core` is a lightweight, headless engine for orchestrating AI agents, tools, and memory. 
+
+It contains **no** Electron bootstrap, **no** UI, **no** deployment setup, **no** rigid user databases, and **no** automatic plugin loading. It is purely the architectural foundation for building powerful, scalable agent systems on your own terms.
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+Install directly from GitHub (or npm if published):
 
 ```bash
-npm install wellagent-core
+npm install github:dkeiz/wellagent-core
 ```
-*(Or install directly from GitHub if not published to npm).*
 
-## Layers
+### The Minimal Runtime
 
-| Layer | Responsibility | Default |
-| --- | --- | --- |
-| Core | composition, lifecycle, events, settings helpers | always available |
-| Storage ports | settings, chat/session, agents, workflows, memory | in-memory reference adapter |
-| Inference | provider base, dispatcher, context helpers | host supplies providers |
-| Tools | validation, policy gate, concurrent tool-use loop | no tools loaded |
-| Agents and workflows | persistence-port-backed state and execution | enabled by Runtime |
-| Extensions | file memory, code loading, remote transport, UI, shards | explicit opt-in only |
+Creating an agent runtime is incredibly simple. Below is a complete backend setup using the built-in in-memory storage.
 
-Runtime assembles the core. `createRuntime()` assembles arbitrary modules. They are complementary: use `Runtime` for a working agent backend and `createRuntime()` when an application needs its own capability graph.
-
-## Minimal runtime
-
-```ts
+```typescript
 import { InMemoryDatabase, Runtime } from 'wellagent-core';
 
+// 1. Initialize storage
 const runtime = new Runtime({
   storage: new InMemoryDatabase(),
 });
 
+// 2. Start the engine
 await runtime.start();
-// Register a provider before calling runtime.chat() or runtime.run().
+
+// 3. Register your LLM provider and execute tasks...
+// (e.g. runtime.chat() or runtime.run())
+
+// 4. Graceful shutdown
 await runtime.shutdown();
 ```
 
-The default storage is in-memory. A database path is deliberately not accepted: the host owns database selection, migration strategy, identity, and deployment.
+> [!NOTE]  
+> The default storage is strictly in-memory. `wellagent-core` deliberately avoids accepting database paths because **you** (the host) should own the database selection, migration strategy, identity logic, and deployment environments.
 
-## Custom storage
+---
 
-Implement only the ports the capability uses. The high-level Runtime accepts the DatabaseAdapter convenience composite; an application that composes its own modules can provide narrower ports.
+## 🏗️ Architecture & Layers
 
-```ts
-import type { AgentStore, StoredAgent } from 'wellagent-core';
+The core is split into distinct, highly decoupled layers:
 
-class MyAgents implements AgentStore {
-  private records = new Map<string | number, StoredAgent>();
+| Layer | Responsibility | Default |
+| :--- | :--- | :--- |
+| ⚙️ **Core** | Composition, lifecycle, events, settings helpers | *Always available* |
+| 💾 **Storage ports** | Settings, chat/session, agents, workflows, memory | *In-memory reference adapter* |
+| 🧠 **Inference** | Provider base, dispatcher, context helpers | *Host supplies providers* |
+| 🛠️ **Tools** | Validation, policy gate, concurrent tool-use loop | *No tools loaded* |
+| 🤖 **Agents & Workflows** | Persistence-port-backed state and execution | *Enabled by Runtime* |
+| 🧩 **Extensions** | File memory, code loading, remote transport, UI, shards | *Explicit opt-in only* |
 
-  async listAgents() {
-    return [...this.records.values()];
-  }
+> `Runtime` assembles the core. `createRuntime()` assembles arbitrary modules. 
+> Use `Runtime` for a standard working agent backend, and `createRuntime()` when your application needs a heavily customized capability graph.
 
-  async saveAgent(agent: StoredAgent) {
-    this.records.set(agent.id, agent);
-    return agent;
-  }
+---
 
-  async deleteAgent(id: string | number) {
-    return this.records.delete(id);
-  }
-}
-```
+## 🛠️ Tools & Permissions
 
-AgentManager and WorkflowManager never execute SQL. SQL, ORM, document store, API, or test-double persistence belongs behind the relevant port.
+Tools automatically validate required parameters and types before handlers run. A security policy is always attached to `Runtime`. Unsafe or confirmation-required tools need an explicit grant.
 
-## Provider and approved tool
+```typescript
+import { InMemoryDatabase, Runtime, ToolDefinition } from 'wellagent-core';
 
-```ts
-import {
-  InMemoryDatabase,
-  Runtime,
-  ToolDefinition,
-} from 'wellagent-core';
-
-const storage = new InMemoryDatabase();
 const approvedTool: ToolDefinition = {
   name: 'get_project_name',
   description: 'Return the configured project name',
@@ -84,47 +89,41 @@ const approvedTool: ToolDefinition = {
 };
 
 const runtime = new Runtime({
-  storage,
+  storage: new InMemoryDatabase(),
   tools: [approvedTool],
 });
 
+// Explicitly grant permission to the project group
 runtime.permissions.setGroupEnabled('project', true);
+
 await runtime.start();
 ```
 
-Tools validate required parameters and types before handlers run. A policy is always attached to Runtime; unsafe or confirmation-required tools need an explicit grant or configured enabled group. Call `runtime.permissions.setToolPermission(name, { allowed: true })` for a single approved tool.
+---
 
-## Modules, agents, and workflows
+## 💾 Custom Storage Portability
 
-```ts
-import { createRuntime, type RuntimeModule } from 'wellagent-core';
+`wellagent-core` never executes SQL directly. Any SQL, ORM, document store, API, or test-double persistence belongs safely behind a custom storage port. You only need to implement the ports that your capability actually uses.
 
-const auditModule: RuntimeModule = {
-  id: 'audit',
-  requires: ['storage'],
-  register: ({ events }) => {
-    events.define({ 'audit:started': { category: 'audit' } });
-  },
-  start: ({ events }) => events.publish('audit:started', {}),
-};
+```typescript
+import type { AgentStore, StoredAgent } from 'wellagent-core';
 
-const runtime = createRuntime({
-  id: 'example',
-  modules: [
-    { id: 'storage' },
-    auditModule,
-  ],
-});
+class MyAgents implements AgentStore {
+  private records = new Map<string | number, StoredAgent>();
 
-await runtime.start();
-await runtime.shutdown();
+  async listAgents() { return [...this.records.values()]; }
+  async saveAgent(agent: StoredAgent) { this.records.set(agent.id, agent); return agent; }
+  async deleteAgent(id: string | number) { return this.records.delete(id); }
+}
 ```
 
-## Extensions
+---
 
-Use extensions only when the host intentionally supplies the security boundary:
+## 🧩 Extensions & Security Boundaries
 
-```ts
+Use extensions **only** when the host intentionally supplies a secure boundary. The library will never autonomously create plugin or connector directories on the filesystem during construction.
+
+```typescript
 import { extensions } from 'wellagent-core';
 
 const plugins = new extensions.PluginManager({
@@ -135,9 +134,20 @@ const plugins = new extensions.PluginManager({
     load: async (filePath) => require(filePath),
   },
   policy: {
+    // Strict host policy enforcement
     allowPlugin: (manifest) => manifest.id === 'trusted-plugin',
   },
 });
 ```
 
-The library never creates plugin or connector directories during construction. Plugin loading requires a host loader and policy. Connector execution requires a host runner. Gateways and A2A servers require authentication for non-loopback bindings. Tunnels require a host process runner.
+---
+
+## 📜 Development Guidelines
+
+When working with `wellagent-core`, adhere to the following principles:
+
+1. **Explicit Composition**: Compose storage, providers, tools, and extensions explicitly.
+2. **Host Agnostic**: Do not assume SQLite, a user model, filesystem persistence, UI, network access, or permission approval exists.
+3. **Strict Boundaries**: Treat all extensions as capability requests that require a strict host policy.
+4. **Use Exports**: Start from `wellagent-core` exports; do not rely on internal file paths.
+5. **Precision Cancellation**: Include a `runId` when cancelling one concurrent ToolChain run. Calling `chain.stop(runId)` never cancels another run.
