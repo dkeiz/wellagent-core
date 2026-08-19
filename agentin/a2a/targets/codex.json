@@ -1,0 +1,21 @@
+{
+  "id": "codex",
+  "label": "Codex",
+  "bridgeType": "provider",
+  "enabled": true,
+  "capabilities": {
+    "chat": true,
+    "streaming": false
+  },
+  "transport": {
+    "type": "provider"
+  },
+  "execution": {
+    "provider": "openai",
+    "transportHint": "codex-cli"
+  },
+  "privacy": {
+    "localOnly": false
+  },
+  "defaults": {}
+}

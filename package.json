@@ -1,23 +1,49 @@
 {
   "name": "wellagent-core",
   "version": "0.3.0",
-  "description": "Core runtime engine for LocalAgent.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Headless LocalAgent engine. Runs anywhere as a CLI and is the foundation for the Wellagent desktop GUI.",
+  "main": "dist/src/main/cli.js",
+  "bin": {
+    "wellagent-core": "dist/src/main/cli.js",
+    "wellagent": "dist/src/main/cli.js"
+  },
   "files": [
-    "dist"
+    "dist",
+    "agentin",
+    "README.md",
+    "LICENSE",
+    ".env.example"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepare": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && node scripts/copy-assets.js",
+    "start": "node dist/src/main/cli.js",
+    "start:cli": "node dist/src/main/cli.js",
+    "nogui": "node dist/src/main/cli.js",
+    "docker:build": "docker build -t wellagent-core .",
+    "docker:run": "docker run --rm -p 8788:8788 wellagent-core"
   },
+  "keywords": [
+    "ai",
+    "agent",
+    "llm",
+    "cli",
+    "local-first",
+    "wellagent"
+  ],
   "author": "LocalAgent",
   "license": "MIT",
-  "dependencies": {
-    "better-sqlite3": "^9.0.1",
-    "@types/node": "^22.0.0",
-    "typescript": "^7.0.2"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkeiz/wellagent-core.git"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "better-sqlite3": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
 }

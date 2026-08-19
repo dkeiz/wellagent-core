@@ -1,0 +1,59 @@
+.app-install-prompt {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 95;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  color: var(--text);
+  box-shadow: var(--shadow-soft);
+}
+.app-install-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.app-install-copy strong,
+.app-install-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.app-install-copy span {
+  color: var(--muted);
+  font-size: calc(var(--type-base, 13px) + 1.08px);
+}
+.app-install-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.app-install-actions a {
+  text-decoration: none;
+}
+.app-install-prompt[hidden] {
+  display: none !important;
+}
+@media (max-width: 560px) {
+  .app-install-prompt {
+    grid-template-columns: 1fr;
+  }
+  .app-install-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .app-install-actions a,
+  .app-install-actions button {
+    width: 100%;
+    min-width: 0;
+  }
+}

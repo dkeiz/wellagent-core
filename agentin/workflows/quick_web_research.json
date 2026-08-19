@@ -1,0 +1,9 @@
+{
+  "name": "Quick Web Research",
+  "description": "Searches the web for a topic and logs the time",
+  "trigger_pattern": "research search lookup",
+  "tool_chain": [
+    { "tool": "search_web_bing", "params": { "query": "example search" } },
+    { "tool": "current_time", "params": {} }
+  ]
+}

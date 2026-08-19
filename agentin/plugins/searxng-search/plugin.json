@@ -1,0 +1,81 @@
+{
+  "id": "searxng-search",
+  "name": "SearXNG Search",
+  "version": "1.0.0",
+  "description": "SearXNG search plugin with optional local personal proxy server, discovery, and search",
+  "main": "main.js",
+  "configSchema": {
+    "baseUrl": {
+      "type": "string",
+      "description": "SearXNG base URL (e.g. https://searx.be)"
+    },
+    "enableLocalServer": {
+      "type": "boolean",
+      "description": "Enable local Node personal proxy server for this plugin"
+    },
+    "localServerHost": {
+      "type": "string",
+      "description": "Host for local proxy server (usually 127.0.0.1)"
+    },
+    "localServerPort": {
+      "type": "number",
+      "description": "Port for local proxy server (0 for auto)"
+    },
+    "discoveryUrls": {
+      "type": "string",
+      "description": "Comma-separated SearXNG base URLs for discovery probes"
+    },
+    "backendMode": {
+      "type": "string",
+      "description": "Backend mode: embedded or remote"
+    },
+    "backendAutoStart": {
+      "type": "boolean",
+      "description": "Auto-start embedded backend process when plugin is enabled"
+    },
+    "backendCommand": {
+      "type": "string",
+      "description": "Executable path for embedded SearXNG backend process"
+    },
+    "backendArgs": {
+      "type": "string",
+      "description": "Command arguments for embedded backend process"
+    },
+    "backendWorkingDir": {
+      "type": "string",
+      "description": "Working directory for backend process"
+    },
+    "backendBaseUrl": {
+      "type": "string",
+      "description": "Embedded backend base URL (e.g. http://127.0.0.1:8080)"
+    },
+    "backendHealthPath": {
+      "type": "string",
+      "description": "Health path appended to backendBaseUrl for readiness checks"
+    },
+    "backendStartupTimeoutMs": {
+      "type": "number",
+      "description": "Max wait for embedded backend readiness"
+    },
+    "timeoutMs": {
+      "type": "number",
+      "description": "HTTP timeout in milliseconds"
+    },
+    "retryCount": {
+      "type": "number",
+      "description": "Retry count for transient HTTP failures"
+    },
+    "defaultLanguage": {
+      "type": "string",
+      "description": "Default language code"
+    },
+    "defaultSafeSearch": {
+      "type": "number",
+      "description": "Safe-search level (0/1/2)"
+    },
+    "defaultMaxResults": {
+      "type": "number",
+      "description": "Default max results"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "agent-rag-studio",
+  "name": "Agent RAG Studio",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Dedicated RAG runtime and tools for the Universal RAG Agent.",
+  "agentSlug": "universal-rag-agent",
+  "capabilities": [
+    "rag"
+  ],
+  "configSchema": {
+    "ollamaUrl": {
+      "type": "string",
+      "description": "Embedding service base URL",
+      "default": "http://127.0.0.1:11434"
+    },
+    "embeddingModel": {
+      "type": "string",
+      "description": "Embedding model name",
+      "default": "nomic-embed-text"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+FROM node:20-alpine
+
+WORKDIR /app
+COPY . .
+
+ENV REMOTE_GATEWAY_HOST=0.0.0.0
+ENV REMOTE_GATEWAY_PORT=8791
+EXPOSE 8791
+
+CMD ["node", "server.js"]

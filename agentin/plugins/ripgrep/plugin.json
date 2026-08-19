@@ -1,0 +1,38 @@
+{
+  "id": "ripgrep",
+  "name": "Ripgrep",
+  "version": "1.0.0",
+  "description": "Fast, local project search powered by the small Ripgrep native binary.",
+  "main": "main.js",
+  "defaultEnabled": true,
+  "privateSafe": true,
+  "tools": {
+    "unprefixed": ["ripgrep"]
+  },
+  "runtimePermissions": {
+    "profile": "plugin-strict",
+    "actions": ["plugin.filesystem.read", "plugin.setup.render"],
+    "managedProcesses": true,
+    "network": ["github.com", "objects.githubusercontent.com"]
+  },
+  "configSchema": {
+    "autoInstall": {
+      "type": "boolean",
+      "default": true,
+      "label": "Install when needed",
+      "description": "Download the pinned Ripgrep binary on the first search when no compatible binary is available."
+    },
+    "preferSystem": {
+      "type": "boolean",
+      "default": false,
+      "label": "Prefer system Ripgrep",
+      "description": "Use rg from PATH before the plugin-managed binary."
+    },
+    "timeoutMs": {
+      "type": "number",
+      "default": 15000,
+      "label": "Search timeout (ms)",
+      "description": "Maximum time allowed for one search."
+    }
+  }
+}

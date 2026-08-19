@@ -1,0 +1,24 @@
+{
+  "id": "whisper-stt",
+  "name": "Whisper STT",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Local Whisper ONNX speech recognition in an isolated plugin runtime.",
+  "defaultEnabled": true,
+  "capabilities": ["stt"],
+  "capabilityContracts": {
+    "stt": {
+      "id": "stt.v1",
+      "version": 1,
+      "actions": ["transcribeAudio", "healthCheck", "getBackendStatus"]
+    }
+  },
+  "configSchema": {
+    "cacheDir": {
+      "type": "string",
+      "label": "Model cache folder",
+      "default": "",
+      "description": "Optional existing local folder containing the Whisper ONNX model cache"
+    }
+  }
+}

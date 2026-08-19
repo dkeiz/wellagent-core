@@ -1,0 +1,26 @@
+{
+  "id": "comfyui",
+  "label": "ComfyUI",
+  "bridgeType": "workflow-http",
+  "enabled": true,
+  "capabilities": {
+    "workflow": true,
+    "artifacts": true
+  },
+  "transport": {
+    "baseUrl": "http://127.0.0.1:8188",
+    "submitPath": "/prompt",
+    "historyPathTemplate": "/history/{id}",
+    "probePath": "/system_stats"
+  },
+  "execution": {
+    "payloadField": "prompt"
+  },
+  "privacy": {
+    "localOnly": true
+  },
+  "defaults": {
+    "pollIntervalMs": 250,
+    "timeoutMs": 15000
+  }
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Main artifact box -->
+  <rect x="12" y="16" width="40" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="2"/>
+  
+  <!-- Document lines -->
+  <line x1="20" y1="26" x2="44" y2="26" stroke="currentColor" stroke-width="1.5"/>
+  <line x1="20" y1="34" x2="44" y2="34" stroke="currentColor" stroke-width="1.5"/>
+  <line x1="20" y1="42" x2="36" y2="42" stroke="currentColor" stroke-width="1.5"/>
+  
+  <!-- Sparkle/star for "artifact" feel -->
+  <path d="M44 12 L46 16 L50 16 L47 19 L48 23 L44 21 L40 23 L41 19 L38 16 L42 16 Z" fill="currentColor" opacity="0.6"/>
+  
+  <!-- Corner accent -->
+  <path d="M52 20 L52 48 L48 48" stroke="currentColor" stroke-width="1.5" fill="none"/>
+</svg>

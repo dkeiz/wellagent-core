@@ -1,0 +1,8 @@
+{
+  "id": "agent-agents-room",
+  "name": "Agents Room UI",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Custom chat UI for hosting and configuring a multi-agent conversation room.",
+  "agentSlug": "agents-room"
+}

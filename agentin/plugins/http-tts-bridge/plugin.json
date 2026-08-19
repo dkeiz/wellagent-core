@@ -1,0 +1,86 @@
+{
+  "id": "http-tts-bridge",
+  "name": "TTS Plugin",
+  "version": "2.0.0",
+  "main": "main.js",
+  "description": "Local TTS plugin for Fast Qwen and Piper with browser fallback.",
+  "capabilities": ["tts"],
+  "capabilityContracts": {
+    "tts": {
+      "id": "tts.v1",
+      "version": 1,
+      "actions": [
+        "speak",
+        "stop",
+        "listVoices",
+        "previewVoice",
+        "healthCheck",
+        "getBackendStatus",
+        "startBackend",
+        "stopBackend",
+        "restartBackend",
+        "getModels",
+        "downloadModel",
+        "getDownloadStatus",
+        "setModelFolder",
+        "importPiperAssets",
+        "copyVoiceSource",
+        "listVoiceSourceFiles",
+        "prepareVoice",
+        "getVoicePrepareStatus",
+        "getStreamPlan",
+        "getPerformance"
+      ]
+    }
+  },
+  "configSchema": {
+    "pythonCommand": {
+      "type": "string",
+      "label": "Python command",
+      "default": "python",
+      "description": "Interpreter used to run the bundled backend"
+    },
+    "backendAutoStart": {
+      "type": "boolean",
+      "label": "Auto start backend",
+      "default": false,
+      "description": "Start the embedded backend in the background when the plugin is enabled"
+    },
+    "qwenModelsRoot": {
+      "type": "string",
+      "label": "Qwen models root",
+      "default": "",
+      "description": "Optional local root folder containing Qwen model directories"
+    },
+    "modelPathsJson": {
+      "type": "textarea",
+      "label": "Model path overrides",
+      "default": "{}",
+      "description": "Optional JSON map of model id to existing local folder"
+    },
+    "piperSourceDir": {
+      "type": "string",
+      "label": "Piper source folder",
+      "default": "",
+      "description": "Optional folder used to copy local Piper assets into the plugin runtime"
+    },
+    "selectedProvider": {
+      "type": "string",
+      "label": "Selected voice engine",
+      "default": "fast-qwen",
+      "description": "Plugin-owned voice engine selection"
+    },
+    "selectedVoice": {
+      "type": "string",
+      "label": "Selected voice",
+      "default": "",
+      "description": "Plugin-owned voice id"
+    },
+    "voiceDescription": {
+      "type": "textarea",
+      "label": "Voice description",
+      "default": "",
+      "description": "Plugin-owned voice style text"
+    }
+  }
+}

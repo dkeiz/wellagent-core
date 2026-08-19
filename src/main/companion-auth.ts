@@ -1,0 +1,496 @@
+// @ts-nocheck
+const crypto = require('crypto');
+const { normalizeOptionalUserId } = require('./user-scope');
+
+const SETTINGS_PREFIX = 'companion.';
+const DEVICES_KEY = `${SETTINGS_PREFIX}devices`;
+const PAIRING_KEY = `${SETTINGS_PREFIX}activePairing`;
+const WSTICKET_KEY = `${SETTINGS_PREFIX}wsTickets`;
+const ARTIFACT_TICKET_KEY = `${SETTINGS_PREFIX}artifactTickets`;
+const PAIRING_TTL_MS = 30 * 60 * 1000;
+const ACCESS_TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
+const ARTIFACT_TICKET_TTL_MS = 5 * 60 * 1000;
+
+function createOpaqueAccessToken() {
+  return `la.${crypto.randomBytes(24).toString('base64url')}.${crypto.randomBytes(24).toString('base64url')}`;
+}
+
+function shortDeviceId(deviceId) {
+  const normalized = String(deviceId || '').trim();
+  if (!normalized) return 'unknown-device';
+  return normalized.length > 18 ? normalized.slice(-18) : normalized;
+}
+
+class CompanionAuth {
+  constructor(db, options = {}) {
+    this._db = db;
+    this._userRegistry = options.userRegistry || null;
+    // Desktop IPC and HTTP dispatch can create separate CompanionAuth instances.
+    // Durable auth state must therefore live in settings, with memory as cache.
+    this._activePairing = null;
+    this._consumedPairingCode = null;
+    this._wsTickets = [];
+    this._artifactTickets = [];
+  }
+
+  _readSettingSync(key) {
+    return this._db.getSettingSync ? this._db.getSettingSync(key) : null;
+  }
+
+  async _readSetting(key) {
+    if (this._db.getSetting) return this._db.getSetting(key);
+    return this._readSettingSync(key);
+  }
+
+  _parseJson(raw, fallback) {
+    if (!raw) return fallback;
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  async _getDefaultUserBinding() {
+    const registry = this._userRegistry;
+    try {
+      const resolvedUser = registry?.getDefaultUser
+        ? await Promise.resolve(registry.getDefaultUser())
+        : null;
+      const userId = String(resolvedUser?.userId || '').trim();
+      if (!userId) return null;
+      return { userId };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async _normalizeDeviceRecord(device = {}, _fallbackBinding = null) {
+    const userId = normalizeOptionalUserId(device?.userId);
+    if (!userId) return null;
+    return {
+      ...device,
+      userId
+    };
+  }
+
+  async _getDevices() {
+    try {
+      const raw = await this._db.getSetting(DEVICES_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(parsed)) return [];
+
+      const defaultBinding = await this._getDefaultUserBinding();
+      let changed = false;
+      const normalizedDevices = (await Promise.all(parsed.map(async (device) => {
+        const normalized = await this._normalizeDeviceRecord(device, defaultBinding);
+        if (!normalized) {
+          changed = true;
+          return null;
+        }
+        if ((normalized.userId || '') !== String(device?.userId || '').trim()) changed = true;
+        return normalized;
+      }))).filter(Boolean);
+
+      if (changed) {
+        await this._saveDevices(normalizedDevices);
+      }
+      return normalizedDevices;
+    } catch (_) { return []; }
+  }
+
+  async _saveDevices(devices) {
+    await this._db.saveSetting(DEVICES_KEY, JSON.stringify(devices));
+  }
+
+  _credentialName(kind, deviceId) {
+    return `companion.${kind}.${String(deviceId || '').trim()}`;
+  }
+
+  _legacyCredentialKey(kind, deviceId) {
+    if (kind === 'sessionToken') return `companion.accessToken.${deviceId}`;
+    if (kind === 'bearerToken') return `companion.bearerToken.${deviceId}`;
+    return `companion.${kind}.${deviceId}`;
+  }
+
+  async _readDeviceCredential(kind, deviceId) {
+    const credentialName = this._credentialName(kind, deviceId);
+    if (this._db.getCredential) {
+      const value = await this._db.getCredential(credentialName);
+      if (value) return value;
+    }
+    const legacyKey = this._legacyCredentialKey(kind, deviceId);
+    const legacy = await this._readSetting(legacyKey);
+    if (legacy && this._db.setCredential) {
+      await this._db.setCredential(credentialName, legacy);
+      await this._db.saveSetting(legacyKey, '').catch(() => {});
+    }
+    return legacy || null;
+  }
+
+  async _saveDeviceCredential(kind, deviceId, value) {
+    const credentialName = this._credentialName(kind, deviceId);
+    if (this._db.setCredential) {
+      await this._db.setCredential(credentialName, value);
+      await this._db.saveSetting(this._legacyCredentialKey(kind, deviceId), '').catch(() => {});
+      return;
+    }
+    await this._db.saveSetting(this._legacyCredentialKey(kind, deviceId), value);
+  }
+
+  async _deleteDeviceCredential(kind, deviceId) {
+    if (this._db.deleteCredential) {
+      await this._db.deleteCredential(this._credentialName(kind, deviceId)).catch(() => {});
+    }
+    await this._db.saveSetting(this._legacyCredentialKey(kind, deviceId), '').catch(() => {});
+  }
+
+  generatePairing(host, port, options = {}) {
+    // Pairing codes are generated by the desktop side, then consumed by the
+    // companion HTTP server. Persist them so those instances share state.
+    const userId = normalizeOptionalUserId(options?.userId || options?.user?.userId || '') || '';
+    if (!userId) {
+      throw new Error('Companion pairing requires a concrete user');
+    }
+    const code = String(crypto.randomInt(100000, 1000000));
+    const pairing = {
+      code,
+      host,
+      port,
+      userId,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + PAIRING_TTL_MS
+    };
+    this._activePairing = pairing;
+    this._consumedPairingCode = null;
+    this._db.saveSetting(PAIRING_KEY, JSON.stringify(pairing)).catch(() => {});
+    console.log('[Companion] Pairing opened for user=' + userId + ' on ' + host + ':' + port + ' code=' + code);
+    return pairing;
+  }
+  getActivePairing(options = {}) {
+    const pairing = this._parseJson(this._readSettingSync(PAIRING_KEY), this._activePairing);
+    const scopedUserId = String(options?.userId || '').trim();
+    if (!pairing || Date.now() > Number(pairing.expiresAt || 0)) return null;
+    if (scopedUserId && String(pairing.userId || '').trim() !== scopedUserId) return null;
+    if (this._consumedPairingCode === pairing.code) return null;
+    this._activePairing = pairing;
+    return pairing;
+  }
+
+  async getActivePairingAsync(options = {}) {
+    const pairing = this._parseJson(await this._readSetting(PAIRING_KEY), this._activePairing);
+    const scopedUserId = String(options?.userId || '').trim();
+    if (!pairing || Date.now() > Number(pairing.expiresAt || 0)) return null;
+    if (scopedUserId && String(pairing.userId || '').trim() !== scopedUserId) return null;
+    if (this._consumedPairingCode === pairing.code) return null;
+    this._activePairing = pairing;
+    return pairing;
+  }
+
+  cancelPairing(options = {}) {
+    const pairing = this.getActivePairing(options);
+    if (options?.userId && !pairing) return;
+    this._activePairing = null;
+    this._db.saveSetting(PAIRING_KEY, '').catch(() => {});
+  }
+
+  async _clearPairing(consumedCode = null) {
+    if (consumedCode) this._consumedPairingCode = consumedCode;
+    this._activePairing = null;
+    await this._db.saveSetting(PAIRING_KEY, '');
+  }
+
+  async validatePairing(body) {
+    // The browser/mobile client owns a stable deviceId. Re-pairing that same
+    // device updates the registry entry instead of creating duplicates.
+    const pairing = await this.getActivePairingAsync();
+    if (!pairing) return { success: false, error: 'No active pairing' };
+    if (body?.pairingCode !== pairing.code) return { success: false, error: 'Invalid pairing code' };
+    if (this._consumedPairingCode === pairing.code) return { success: false, error: 'No active pairing' };
+    await this._clearPairing(pairing.code);
+
+    const requestedDeviceId = String(body?.deviceId || '').trim();
+    const deviceId = requestedDeviceId || 'device-' + crypto.randomBytes(16).toString('hex');
+    const deviceName = String(body?.deviceName || 'Unknown Device').trim() || 'Unknown Device';
+    const platform = String(body?.platform || 'web').trim().toLowerCase();
+
+    const devices = await this._getDevices();
+    const existingIndex = devices.findIndex(device => device.deviceId === deviceId);
+    const pairingUserId = String(pairing?.userId || '').trim();
+    if (!pairingUserId) {
+      return { success: false, error: 'Pairing is not bound to a user' };
+    }
+    if (existingIndex >= 0 && String(devices[existingIndex]?.userId || '').trim() !== pairingUserId) {
+      return { success: false, error: 'Device is already paired to a different user' };
+    }
+    const nextDevice = {
+      deviceId,
+      deviceName,
+      platform,
+      userId: pairingUserId,
+      pairedAt: existingIndex >= 0 ? devices[existingIndex].pairedAt : Date.now(),
+      lastSeenAt: Date.now(),
+      permissions: { preset: 'standard', mediaUpload: true, settingsWrite: true, agentManagement: false, daemonControl: true }
+    };
+    if (existingIndex >= 0) {
+      devices[existingIndex] = { ...devices[existingIndex], ...nextDevice };
+    } else {
+      devices.push(nextDevice);
+    }
+    await this._saveDevices(devices);
+
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    await this._storeAccessToken(deviceId, sessionToken);
+    console.log(`[Companion] Pairing accepted: ${shortDeviceId(deviceId)} ${platform} "${deviceName}"`);
+
+    return { success: true, sessionToken, deviceId, deviceName, platform };
+  }
+
+  async authenticate(body) {
+    // Session token is the durable device credential; bearer tokens and WS
+    // tickets are short-lived runtime credentials derived from it.
+    const deviceId = String(body?.deviceId || '').trim();
+    const sessionToken = String(body?.sessionToken || '').trim();
+    if (!deviceId || !sessionToken) return { success: false, error: 'deviceId and sessionToken required' };
+
+    const devices = await this._getDevices();
+    const device = devices.find(d => d.deviceId === deviceId);
+    if (!device) return { success: false, error: 'Device not found' };
+
+    const storedToken = await this._readDeviceCredential('sessionToken', deviceId);
+    if (!storedToken || storedToken !== sessionToken) return { success: false, error: 'Invalid session token' };
+
+    const accessToken = createOpaqueAccessToken();
+    const accessTokenState = await this._storeAccessToken(deviceId, sessionToken, accessToken);
+    const wsTicket = this.issueWsTicket(deviceId);
+
+    device.lastSeenAt = Date.now();
+    const idx = devices.findIndex(d => d.deviceId === deviceId);
+    if (idx >= 0) devices[idx] = device;
+    await this._saveDevices(devices);
+    console.log(`[Companion] Authenticated: ${shortDeviceId(deviceId)} ${device.platform || 'web'}`);
+
+    return {
+      success: true,
+      accessToken,
+      accessTokenExpiresAt: accessTokenState?.expiresAt || Date.now() + ACCESS_TOKEN_TTL_MS,
+      accessTokenExpiresIn: Math.floor(ACCESS_TOKEN_TTL_MS / 1000),
+      wsTicket,
+      deviceId,
+      deviceName: device.deviceName,
+      platform: device.platform
+    };
+  }
+
+  async _storeAccessToken(deviceId, sessionToken, accessToken) {
+    if (sessionToken) await this._saveDeviceCredential('sessionToken', deviceId, sessionToken);
+    if (accessToken) return this._saveBearerCredential(deviceId, accessToken);
+    return null;
+  }
+
+  _buildBearerCredential(token, now = Date.now()) {
+    return {
+      version: 1,
+      token: String(token || '').trim(),
+      issuedAt: now,
+      expiresAt: now + ACCESS_TOKEN_TTL_MS
+    };
+  }
+
+  _parseBearerCredential(raw) {
+    const value = String(raw || '').trim();
+    if (!value) return null;
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === 'object' && parsed.token) {
+        return {
+          token: String(parsed.token || '').trim(),
+          issuedAt: Number(parsed.issuedAt || 0),
+          expiresAt: Number(parsed.expiresAt || 0),
+          legacy: false
+        };
+      }
+    } catch (_) {}
+    return {
+      token: value,
+      issuedAt: 0,
+      expiresAt: 0,
+      legacy: true
+    };
+  }
+
+  async _saveBearerCredential(deviceId, token, now = Date.now()) {
+    const credential = this._buildBearerCredential(token, now);
+    await this._saveDeviceCredential('bearerToken', deviceId, JSON.stringify(credential));
+    return credential;
+  }
+
+  async _readBearerCredential(deviceId) {
+    const raw = await this._readDeviceCredential('bearerToken', deviceId);
+    return this._parseBearerCredential(raw);
+  }
+
+  async validateAccessToken(token) {
+    if (!token) return { valid: false, error: 'No token' };
+    const now = Date.now();
+    let matchedExpired = false;
+    const devices = await this._getDevices();
+    for (const device of devices) {
+      let stored = await this._readBearerCredential(device.deviceId);
+      if (!stored?.token) continue;
+      if (stored.legacy === true || !stored.expiresAt) {
+        stored = await this._saveBearerCredential(device.deviceId, stored.token, now);
+      }
+
+      if (stored.expiresAt <= now) {
+        if (stored.token === token) matchedExpired = true;
+        await this._deleteDeviceCredential('bearerToken', device.deviceId);
+        continue;
+      }
+
+      if (stored.token === token) {
+        return {
+          valid: true,
+          payload: device,
+          accessTokenExpiresAt: stored.expiresAt,
+          accessTokenExpiresIn: Math.max(0, Math.floor((stored.expiresAt - now) / 1000))
+        };
+      }
+    }
+    return { valid: false, error: matchedExpired ? 'Access token expired' : 'Invalid access token' };
+  }
+
+  async listDevices(options = {}) {
+    const devices = await this._getDevices();
+    const scopedUserId = String(options?.userId || '').trim();
+    return scopedUserId
+      ? devices.filter(device => String(device?.userId || '').trim() === scopedUserId)
+      : devices.filter(device => String(device?.userId || '').trim());
+  }
+
+  async removeDevice(deviceId, options = {}) {
+    const devices = await this._getDevices();
+    const scopedUserId = String(options?.userId || '').trim();
+    const target = devices.find(d => d.deviceId === deviceId);
+    if (!target) return { success: false, error: 'Device not found' };
+    if (scopedUserId && String(target.userId || '').trim() !== scopedUserId) {
+      return { success: false, error: 'Device not found' };
+    }
+    const filtered = devices.filter(d => d.deviceId !== deviceId);
+    await this._saveDevices(filtered);
+    await this._deleteDeviceCredential('sessionToken', deviceId);
+    await this._deleteDeviceCredential('bearerToken', deviceId);
+    return { success: true };
+  }
+
+  issueWsTicket(deviceId) {
+    const ticket = crypto.randomBytes(16).toString('hex');
+    const tickets = this._getWsTickets();
+    tickets.push({ ticket, deviceId, createdAt: Date.now(), expiresAt: Date.now() + 60000 });
+    this._saveWsTickets(tickets);
+    return ticket;
+  }
+
+  validateWsTicket(ticket) {
+    const tickets = this._getWsTickets();
+    const normalizedTicket = String(ticket || '').trim();
+    const now = Date.now();
+    const entryIndex = tickets.findIndex(candidate => (
+      candidate.ticket === normalizedTicket && Number(candidate.expiresAt || 0) > now
+    ));
+    const entry = entryIndex >= 0 ? tickets[entryIndex] : null;
+    if (!entry) {
+      return { valid: false, error: 'Invalid or expired ticket' };
+    }
+    const nextTickets = tickets.filter((candidate, index) => (
+      index !== entryIndex && Number(candidate.expiresAt || 0) > now
+    ));
+    this._saveWsTickets(nextTickets);
+    return { valid: true, deviceId: entry.deviceId };
+  }
+
+  issueArtifactTicket(deviceId, sessionId, fileName) {
+    const ticket = crypto.randomBytes(24).toString('hex');
+    const tickets = this._getArtifactTickets();
+    tickets.push({
+      ticket,
+      deviceId: String(deviceId || '').trim(),
+      sessionId: String(sessionId || '').trim(),
+      fileName: String(fileName || '').trim(),
+      createdAt: Date.now(),
+      expiresAt: Date.now() + ARTIFACT_TICKET_TTL_MS
+    });
+    this._artifactTickets = tickets;
+    this._db.saveSetting(ARTIFACT_TICKET_KEY, JSON.stringify(tickets)).catch(() => {});
+    return { ticket, expiresIn: Math.floor(ARTIFACT_TICKET_TTL_MS / 1000), expiresAt: Date.now() + ARTIFACT_TICKET_TTL_MS };
+  }
+
+  _saveArtifactTickets(tickets) {
+    this._artifactTickets = Array.isArray(tickets) ? tickets : [];
+    this._db.saveSetting(ARTIFACT_TICKET_KEY, JSON.stringify(this._artifactTickets)).catch(() => {});
+  }
+
+  _saveWsTickets(tickets) {
+    this._wsTickets = Array.isArray(tickets) ? tickets : [];
+    this._db.saveSetting(WSTICKET_KEY, JSON.stringify(this._wsTickets)).catch(() => {});
+  }
+
+  async validateArtifactTicket(ticket, sessionId, fileName) {
+    const normalizedTicket = String(ticket || '').trim();
+    if (!normalizedTicket) return { valid: false, error: 'No artifact ticket' };
+    const normalizedSessionId = String(sessionId || '').trim();
+    const normalizedFileName = String(fileName || '').trim();
+    const tickets = this._getArtifactTickets();
+    const entryIndex = tickets.findIndex(candidate => (
+      candidate.ticket === normalizedTicket
+      && candidate.sessionId === normalizedSessionId
+      && candidate.fileName === normalizedFileName
+      && Number(candidate.expiresAt || 0) > Date.now()
+    ));
+    const entry = entryIndex >= 0 ? tickets[entryIndex] : null;
+    if (!entry) return { valid: false, error: 'Invalid or expired artifact ticket' };
+
+    const nextTickets = tickets.filter((candidate, index) => (
+      index !== entryIndex && Number(candidate.expiresAt || 0) > Date.now()
+    ));
+    this._saveArtifactTickets(nextTickets);
+
+    const devices = await this._getDevices();
+    const device = devices.find(candidate => candidate.deviceId === entry.deviceId);
+    if (!device) return { valid: false, error: 'Device not found' };
+    return { valid: true, payload: device, deviceId: entry.deviceId };
+  }
+
+  _getWsTickets() {
+    const tickets = this._parseJson(this._readSettingSync(WSTICKET_KEY), this._wsTickets);
+    this._wsTickets = Array.isArray(tickets)
+      ? tickets.filter(t => Number(t.expiresAt || 0) > Date.now())
+      : [];
+    return this._wsTickets;
+  }
+
+  _getArtifactTickets() {
+    const tickets = this._parseJson(this._readSettingSync(ARTIFACT_TICKET_KEY), this._artifactTickets);
+    this._artifactTickets = Array.isArray(tickets)
+      ? tickets.filter(t => Number(t.expiresAt || 0) > Date.now())
+      : [];
+    return this._artifactTickets;
+  }
+
+  async updateDevicePermissions(deviceId, permissions, options = {}) {
+    const devices = await this._getDevices();
+    const scopedUserId = String(options?.userId || '').trim();
+    const idx = devices.findIndex(d => d.deviceId === deviceId && (!scopedUserId || String(d?.userId || '').trim() === scopedUserId));
+    if (idx < 0) return { success: false, error: 'Device not found' };
+    devices[idx].permissions = { ...devices[idx].permissions, ...permissions };
+    await this._saveDevices(devices);
+    return { success: true };
+  }
+}
+
+module.exports = CompanionAuth;
+
+
+
+
+

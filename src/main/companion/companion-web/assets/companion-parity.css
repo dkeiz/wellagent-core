@@ -1,0 +1,112 @@
+:root {
+  --companion-type-base: var(--type-base, 13px);
+  --companion-radius-card: 8px;
+  --companion-radius-control: 6px;
+}
+
+html,
+body,
+button,
+input,
+textarea {
+  font-size: var(--companion-type-base);
+  letter-spacing: 0;
+}
+
+.auth-card,
+.topbar,
+.headline-card,
+.message-list,
+.message-card,
+.composer-shell,
+.sidebar,
+.sidebar-section,
+.artifact-dialog {
+  border-radius: var(--companion-radius-card);
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.danger-btn,
+.compact-btn,
+.message-action,
+.capability-chip,
+.session-item,
+.agent-toggle,
+.artifact-item,
+#composer-input {
+  border-radius: var(--companion-radius-control);
+}
+
+.message-body p {
+  margin: 0 0 0.65rem;
+}
+
+.message-body p:last-child {
+  margin-bottom: 0;
+}
+
+.message-body ul,
+.message-body ol {
+  margin: 0.45rem 0 0.75rem 1.2rem;
+  padding: 0;
+}
+
+.message-body blockquote {
+  margin: 0.55rem 0;
+  padding: 0.1rem 0 0.1rem 0.75rem;
+  border-left: 3px solid var(--border-color, var(--line));
+  color: var(--text-secondary, var(--muted));
+}
+
+.thinking-block {
+  margin: 0.5rem 0;
+  border: 1px solid var(--border-color, var(--line));
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--card-bg, var(--panel));
+}
+
+.thinking-block summary {
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  font-size: calc(var(--type-base, 13px) + 0.6px);
+  color: var(--text-secondary, var(--muted));
+  background: var(--bg-secondary, var(--panel-soft));
+  user-select: none;
+}
+
+.thinking-content {
+  padding: 0.5rem 0.75rem;
+  font-size: calc(var(--type-base, 13px) + 0.6px);
+  color: var(--text-secondary, var(--muted));
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+  border-top: 1px solid var(--border-color, var(--line));
+}
+
+.chat-image,
+.artifact-image {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: 8px;
+  display: block;
+  object-fit: contain;
+}
+
+.companion-attachment {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.4rem 0;
+}
+
+.companion-attachment-image {
+  color: var(--text-secondary, var(--muted));
+  text-decoration: none;
+}
+
+.companion-attachment-audio audio {
+  width: min(100%, 420px);
+}

@@ -1,0 +1,1215 @@
+{
+  "version": 2,
+  "defaults": {
+    "runtime": {
+      "reasoning": {
+        "enabled": false,
+        "visibility": "show",
+        "effort": "medium",
+        "maxTokens": null
+      },
+      "streaming": {
+        "text": false,
+        "reasoning": false
+      },
+      "providerRouting": {
+        "requireParameters": false
+      },
+      "contextWindow": {
+        "value": 8192
+      },
+      "requestOverrides": {}
+    },
+    "capabilities": {
+      "reasoning": {
+        "supported": false,
+        "toggle": false,
+        "effortLevels": [],
+        "maxTokens": false,
+        "visibilityModes": [
+          "show",
+          "min",
+          "hide"
+        ],
+        "outputChannel": "none",
+        "parameterMode": "none",
+        "defaultEnabled": false
+      },
+      "streaming": {
+        "text": true,
+        "reasoning": "none"
+      },
+      "providerRouting": {
+        "requireParameters": false
+      },
+      "contextWindow": {
+        "supported": false,
+        "configurable": false,
+        "presets": [
+          4096,
+          8192,
+          16384,
+          32768,
+          49152,
+          65536,
+          98304,
+          131072,
+          196608,
+          262144
+        ],
+        "min": 4096,
+        "max": 262144
+      },
+      "modalities": {
+        "text": true,
+        "vision": false,
+        "audioInput": false,
+        "audioOutput": false
+      },
+      "requestOverrides": {
+        "supported": false
+      }
+    },
+    "notes": []
+  },
+  "providers": {
+    "ollama": {
+      "label": "Ollama",
+      "description": "Local Ollama server with model-specific reasoning behavior and adjustable context size.",
+      "catalog": [
+        "llama3.2",
+        "qwen3:latest",
+        "qwq:latest",
+        "deepseek-r1:latest"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Custom Model",
+        "customModelPlaceholder": "e.g. deepseek-v3.2:cloud",
+        "customModelHelp": "Use this for manually pulled Ollama tags or cloud model aliases.",
+        "connectionFields": []
+      },
+      "runtime": {
+        "contextWindow": {
+          "value": 8192
+        },
+        "streaming": {
+          "text": false,
+          "reasoning": false
+        }
+      },
+      "capabilities": {
+        "streaming": {
+          "text": true,
+          "reasoning": "inline"
+        },
+        "contextWindow": {
+          "supported": true,
+          "configurable": true
+        }
+      },
+      "notes": [],
+      "models": [
+        {
+          "id": "ollama-qwen-reasoning",
+          "label": "Qwen / QwQ Reasoning",
+          "match": [
+            "qwen3*",
+            "qwen2.5*",
+            "qwen*",
+            "qwq*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "outputChannel": "inline",
+              "parameterMode": "slash_commands",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "Uses /think and /nothink prefixes, which matches the existing working behavior in this app."
+          ]
+        },
+        {
+          "id": "ollama-deepseek-reasoning",
+          "label": "DeepSeek Reasoning",
+          "match": [
+            "deepseek-r1*",
+            "deepseek-r1-distill*",
+            "deepseek*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "outputChannel": "inline",
+              "parameterMode": "slash_commands",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "Reasoning is treated as inline output for local Ollama models."
+          ]
+        },
+        {
+          "id": "ollama-gpt-oss-reasoning",
+          "label": "GPT OSS / Kimi Reasoning",
+          "match": [
+            "gpt-oss*",
+            "openai/gpt-oss-*",
+            "kimi*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true,
+              "effort": "medium"
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "outputChannel": "inline",
+              "parameterMode": "prompt_hint",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "For GPT OSS / Kimi aliases on Ollama, reasoning is guided with prompt hints instead of slash commands."
+          ]
+        }
+      ]
+    },
+    "lmstudio": {
+      "label": "LM Studio",
+      "description": "OpenAI-compatible local server. Reasoning control depends on the loaded model.",
+      "catalog": [],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": true,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. local-model",
+        "customModelHelp": "Useful when discovery is disabled or the server is still warming up.",
+        "connectionFields": [
+          {
+            "id": "url",
+            "label": "LM Studio URL",
+            "type": "text",
+            "placeholder": "http://localhost:1234",
+            "defaultValue": "http://localhost:1234",
+            "required": true,
+            "helpText": "Enable the LM Studio local server, then point this to its base URL."
+          },
+          {
+            "id": "apiKey",
+            "label": "API Key",
+            "type": "password",
+            "placeholder": "Optional",
+            "required": false,
+            "helpText": "Leave blank unless you configured LM Studio to require a bearer token."
+          }
+        ]
+      },
+      "runtime": {
+        "contextWindow": {
+          "value": 8192
+        },
+        "streaming": {
+          "text": false,
+          "reasoning": false
+        }
+      },
+      "capabilities": {
+        "streaming": {
+          "text": true,
+          "reasoning": "inline"
+        },
+        "contextWindow": {
+          "supported": true,
+          "configurable": true
+        },
+        "requestOverrides": {
+          "supported": true
+        }
+      },
+      "notes": [
+        "LM Studio exposes streaming, but this app currently consumes responses as complete messages."
+      ],
+      "models": [
+        {
+          "id": "lmstudio-generic-reasoning",
+          "label": "Generic Local Reasoning",
+          "match": [
+            "qwen*",
+            "qwq*",
+            "deepseek*",
+            "r1*",
+            "gpt-oss*",
+            "gpt-oss-*",
+            "gpt-oss 120*",
+            "openai/gpt-oss-*"
+          ],
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "outputChannel": "inline",
+              "parameterMode": "prompt_hint",
+              "defaultEnabled": false
+            }
+          },
+          "notes": [
+            "LM Studio does not expose a unified reasoning parameter, so the app falls back to prompt guidance."
+          ]
+        }
+      ]
+    },
+    "openrouter": {
+      "label": "OpenRouter",
+      "description": "OpenRouter with model-aware reasoning config and provider routing safeguards.",
+      "catalog": [
+        "openai/gpt-oss-120b",
+        "qwen/qwen3-32b",
+        "deepseek/deepseek-r1"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. meta-llama/llama-4-maverick",
+        "customModelHelp": "Useful when you already know the OpenRouter model slug.",
+        "connectionFields": [
+          {
+            "id": "apiKey",
+            "label": "OpenRouter API Key",
+            "type": "password",
+            "placeholder": "sk-or-...",
+            "required": true
+          }
+        ]
+      },
+      "runtime": {
+        "providerRouting": {
+          "requireParameters": true
+        },
+        "streaming": {
+          "text": false,
+          "reasoning": false
+        }
+      },
+      "capabilities": {
+        "streaming": {
+          "text": true,
+          "reasoning": "separate"
+        },
+        "providerRouting": {
+          "requireParameters": true
+        }
+      },
+      "notes": [
+        "OpenRouter can normalize reasoning controls across multiple backend providers.",
+        "Provider routing is configured to require parameter support when reasoning settings are used."
+      ],
+      "models": [
+        {
+          "id": "openrouter-gpt-oss",
+          "label": "GPT OSS",
+          "match": [
+            "openai/gpt-oss-*",
+            "gpt-oss-*",
+            "gpt-oss*",
+            "gpt-oss 120*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true,
+              "effort": "medium"
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "outputChannel": "separate",
+              "parameterMode": "openrouter_reasoning",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "Maps to OpenRouter reasoning.effort with GPT OSS-friendly levels."
+          ]
+        },
+        {
+          "id": "openrouter-qwen-thinking",
+          "label": "Qwen Thinking",
+          "match": [
+            "qwen/qwen3.5*",
+            "qwen/qwen3*",
+            "qwen/qwq*",
+            "qwen*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true,
+              "maxTokens": 2048
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "maxTokens": true,
+              "outputChannel": "separate",
+              "parameterMode": "openrouter_reasoning",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "OpenRouter maps reasoning.max_tokens to thinking_budget for supported Alibaba Qwen models."
+          ]
+        },
+        {
+          "id": "openrouter-deepseek-reasoning",
+          "label": "DeepSeek Reasoning",
+          "match": [
+            "deepseek/deepseek-r1*",
+            "deepseek-r1*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "outputChannel": "separate",
+              "parameterMode": "openrouter_reasoning",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "Reasoning output may be returned separately when the selected OpenRouter backend supports it."
+          ]
+        }
+      ]
+    },
+    "qwen": {
+      "label": "Qwen",
+      "description": "DashScope / Qwen with explicit thinking toggles and token budgets where supported.",
+      "catalog": [
+        "qwen-max",
+        "qwen-plus",
+        "qwen-turbo",
+        "qwen3-235b-a22b-thinking-2507"
+      ],
+      "settings": {
+        "supportsModes": true,
+        "supportsCustomModel": false,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "connectionFields": []
+      },
+      "runtime": {
+        "streaming": {
+          "text": false,
+          "reasoning": false
+        }
+      },
+      "capabilities": {
+        "streaming": {
+          "text": true,
+          "reasoning": "separate"
+        }
+      },
+      "notes": [
+        "DashScope models can expose reasoning separately from the final answer when enabled."
+      ],
+      "models": [
+        {
+          "id": "qwen-3.5-thinking",
+          "label": "Qwen 3.5 Thinking",
+          "match": [
+            "qwen3.5*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true,
+              "maxTokens": 2048
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "maxTokens": true,
+              "outputChannel": "separate",
+              "parameterMode": "qwen_enable_thinking",
+              "defaultEnabled": true
+            }
+          },
+          "notes": [
+            "Qwen 3.5 thinking models default to reasoning on and support thinking_budget."
+          ]
+        },
+        {
+          "id": "qwen-hybrid-thinking",
+          "label": "Qwen Hybrid Thinking",
+          "match": [
+            "qwen-plus*",
+            "qwen-max*",
+            "qwen-turbo*",
+            "qwen3*",
+            "qwq*"
+          ],
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "maxTokens": true,
+              "outputChannel": "separate",
+              "parameterMode": "qwen_enable_thinking",
+              "defaultEnabled": false
+            }
+          },
+          "notes": [
+            "Hybrid Qwen models can be switched between normal generation and reasoning mode."
+          ]
+        }
+      ]
+    },
+    "openai": {
+      "label": "OpenAI",
+      "description": "OpenAI API models using an API key.",
+      "catalog": [
+        "gpt-5.2",
+        "gpt-5.2-pro",
+        "gpt-5-mini",
+        "gpt-5-nano",
+        "gpt-4.1"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. ft:gpt-4.1-mini:org:custom",
+        "customModelHelp": "Use this for fine-tuned or newly released API model IDs.",
+        "connectionFields": [
+          {
+            "id": "apiKey",
+            "label": "OpenAI API Key",
+            "type": "password",
+            "placeholder": "sk-...",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "ChatGPT subscription plans do not include API credits; connect this provider with an OpenAI API key.",
+        "The API model list is discovered from the official /v1/models endpoint."
+      ],
+      "models": [
+        {
+          "id": "openai-gpt-5.2",
+          "label": "GPT-5.2 Family",
+          "match": [
+            "gpt-5.2*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true,
+              "effort": "medium"
+            },
+            "contextWindow": {
+              "value": 400000
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high",
+                "xhigh"
+              ],
+              "outputChannel": "separate",
+              "parameterMode": "openai_reasoning_effort",
+              "defaultEnabled": true
+            },
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 400000
+            },
+            "modalities": {
+              "vision": true
+            }
+          },
+          "notes": [
+            "GPT-5.2 supports configurable reasoning effort and image input."
+          ]
+        },
+        {
+          "id": "openai-gpt-5",
+          "label": "GPT-5 Family",
+          "match": [
+            "gpt-5",
+            "gpt-5-mini*",
+            "gpt-5-nano*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true,
+              "effort": "medium"
+            },
+            "contextWindow": {
+              "value": 400000
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "effortLevels": [
+                "minimal",
+                "low",
+                "medium",
+                "high"
+              ],
+              "outputChannel": "separate",
+              "parameterMode": "openai_reasoning_effort",
+              "defaultEnabled": true
+            },
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 400000
+            },
+            "modalities": {
+              "vision": true
+            }
+          },
+          "notes": [
+            "GPT-5 family models are reasoning-first and accept image input."
+          ]
+        },
+        {
+          "id": "openai-gpt-4.1",
+          "label": "GPT-4.1 Family",
+          "match": [
+            "gpt-4.1*"
+          ],
+          "runtime": {
+            "contextWindow": {
+              "value": 1047576
+            }
+          },
+          "capabilities": {
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 1047576
+            },
+            "modalities": {
+              "vision": true
+            }
+          },
+          "notes": [
+            "GPT-4.1 is a non-reasoning family with image input support."
+          ]
+        }
+      ]
+    },
+    "groq": {
+      "label": "Groq",
+      "description": "Low-latency OpenAI-compatible API from Groq.",
+      "catalog": [
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile",
+        "openai/gpt-oss-120b",
+        "openai/gpt-oss-20b",
+        "qwen/qwen3-32b"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. meta-llama/llama-4-scout-17b",
+        "customModelHelp": "Use this if you already know the exact Groq model slug.",
+        "connectionFields": [
+          {
+            "id": "apiKey",
+            "label": "Groq API Key",
+            "type": "password",
+            "placeholder": "gsk_...",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Groq exposes an OpenAI-compatible API surface and a /models endpoint."
+      ],
+      "models": [
+        {
+          "id": "groq-gpt-oss",
+          "label": "GPT OSS on Groq",
+          "match": [
+            "openai/gpt-oss-*",
+            "gpt-oss-*",
+            "gpt-oss*",
+            "gpt-oss 120*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true
+            },
+            "contextWindow": {
+              "value": 131072
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "effortLevels": [
+                "low",
+                "medium",
+                "high"
+              ],
+              "outputChannel": "inline",
+              "parameterMode": "openai_reasoning_effort",
+              "defaultEnabled": true
+            },
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 131072
+            }
+          },
+          "notes": [
+            "Groq exposes GPT OSS models through its OpenAI-compatible API, but explicit reasoning controls vary by model."
+          ]
+        }
+      ]
+    },
+    "deepseek": {
+      "label": "DeepSeek",
+      "description": "DeepSeek OpenAI-compatible API with separate reasoning output on reasoner models.",
+      "catalog": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. deepseek-chat",
+        "customModelHelp": "Useful for newly released DeepSeek aliases.",
+        "connectionFields": [
+          {
+            "id": "apiKey",
+            "label": "DeepSeek API Key",
+            "type": "password",
+            "placeholder": "sk-...",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "DeepSeek's reasoner returns reasoning_content separately from the final answer."
+      ],
+      "models": [
+        {
+          "id": "deepseek-reasoner",
+          "label": "DeepSeek Reasoner",
+          "match": [
+            "deepseek-reasoner*"
+          ],
+          "runtime": {
+            "reasoning": {
+              "enabled": true
+            },
+            "contextWindow": {
+              "value": 128000
+            }
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": false,
+              "outputChannel": "separate",
+              "parameterMode": "none",
+              "defaultEnabled": true
+            },
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 128000
+            }
+          },
+          "notes": [
+            "DeepSeek reasoner always returns a reasoning trace before the final answer."
+          ]
+        },
+        {
+          "id": "deepseek-chat",
+          "label": "DeepSeek Chat",
+          "match": [
+            "deepseek-chat*"
+          ],
+          "runtime": {
+            "contextWindow": {
+              "value": 128000
+            }
+          },
+          "capabilities": {
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 128000
+            }
+          },
+          "notes": [
+            "DeepSeek chat models use the same OpenAI-compatible surface without separate reasoning content."
+          ]
+        }
+      ]
+    },
+    "mistral": {
+      "label": "Mistral",
+      "description": "Mistral API with chat completions and official model discovery.",
+      "catalog": [
+        "mistral-large-latest",
+        "mistral-medium-latest",
+        "mistral-small-latest",
+        "pixtral-large-latest",
+        "codestral-latest"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. ministral-8b-latest",
+        "customModelHelp": "Use this when Mistral releases a new alias before your next refresh.",
+        "connectionFields": [
+          {
+            "id": "apiKey",
+            "label": "Mistral API Key",
+            "type": "password",
+            "placeholder": "mistral-...",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Mistral exposes chat completions and a model list through its official API."
+      ],
+      "models": [
+        {
+          "id": "mistral-pixtral",
+          "label": "Pixtral Vision",
+          "match": [
+            "pixtral*"
+          ],
+          "capabilities": {
+            "modalities": {
+              "vision": true
+            }
+          },
+          "notes": [
+            "Pixtral models accept visual input."
+          ]
+        },
+        {
+          "id": "mistral-codestral",
+          "label": "Codestral",
+          "match": [
+            "codestral*"
+          ],
+          "notes": [
+            "Codestral-family models are code-oriented but do not expose provider-specific reasoning controls here."
+          ]
+        }
+      ]
+    },
+    "anthropic": {
+      "label": "Anthropic (Compat)",
+      "description": "Anthropic's OpenAI SDK compatibility layer. Useful, but not Anthropic's recommended long-term API path.",
+      "catalog": [
+        "claude-sonnet-4-20250514",
+        "claude-opus-4-20250514",
+        "claude-3-7-sonnet-latest",
+        "claude-3-5-haiku-latest"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. claude-sonnet-4-20250514",
+        "customModelHelp": "Use this when you know the exact Claude model ID.",
+        "connectionFields": [
+          {
+            "id": "apiKey",
+            "label": "Anthropic API Key",
+            "type": "password",
+            "placeholder": "sk-ant-...",
+            "required": true
+          }
+        ]
+      },
+      "notes": [
+        "Anthropic provides an OpenAI SDK compatibility layer, but recommends the native Anthropic API for full feature coverage."
+      ],
+      "models": [
+        {
+          "id": "anthropic-claude",
+          "label": "Claude Family",
+          "match": [
+            "claude*"
+          ],
+          "runtime": {
+            "contextWindow": {
+              "value": 200000
+            }
+          },
+          "capabilities": {
+            "contextWindow": {
+              "supported": true,
+              "configurable": false,
+              "max": 200000
+            },
+            "modalities": {
+              "vision": true
+            }
+          },
+          "notes": [
+            "Claude models support image input, but compatibility-mode feature coverage is narrower than the native Anthropic API."
+          ]
+        }
+      ]
+    },
+    "byok": {
+      "label": "BYOK (OpenAI-Compatible)",
+      "description": "Bring any OpenAI-compatible provider: add endpoint URL, optional API key, discover models if the server exposes /models.",
+      "catalog": [],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": true,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. provider/model-name",
+        "customModelHelp": "Useful when the upstream server does not expose discovery or you know the exact model ID already.",
+        "connectionFields": [
+          {
+            "id": "url",
+            "label": "Base URL",
+            "type": "text",
+            "placeholder": "https://your-endpoint.example.com/v1",
+            "required": true,
+            "helpText": "Point this at the OpenAI-compatible base URL for the provider you want to use."
+          },
+          {
+            "id": "apiKey",
+            "label": "API Key",
+            "type": "password",
+            "placeholder": "Optional unless your provider requires it",
+            "required": false
+          }
+        ]
+      },
+      "notes": [
+        "Model discovery depends on the server exposing a standard /models endpoint.",
+        "Use request overrides for provider-specific extra body parameters."
+      ],
+      "models": [
+        {
+          "id": "byok-generic-reasoning",
+          "label": "Generic OpenAI-Compatible Reasoning",
+          "match": [
+            "qwen*",
+            "qwq*",
+            "deepseek*",
+            "r1*",
+            "gpt-oss*",
+            "gpt-oss-*",
+            "gpt-oss 120*",
+            "openai/gpt-oss-*"
+          ],
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "outputChannel": "inline",
+              "parameterMode": "prompt_hint",
+              "defaultEnabled": false
+            },
+            "requestOverrides": {
+              "supported": true
+            }
+          },
+          "notes": [
+            "Generic OpenAI-compatible endpoints do not standardize reasoning controls, so this provider falls back to prompt guidance plus request overrides."
+          ]
+        }
+      ]
+    },
+    "local-openai": {
+      "label": "Local Server",
+      "description": "Local OpenAI-compatible server such as vLLM, llama.cpp server, or similar tools.",
+      "catalog": [],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": true,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. NousResearch/Meta-Llama-3-8B-Instruct",
+        "customModelHelp": "Use this when your local server does not expose /models yet or the model is still loading.",
+        "connectionFields": [
+          {
+            "id": "url",
+            "label": "Server URL",
+            "type": "text",
+            "placeholder": "http://127.0.0.1:8000/v1",
+            "defaultValue": "http://127.0.0.1:8000/v1",
+            "required": true,
+            "helpText": "For vLLM use the OpenAI-compatible base URL. For llama.cpp server use the local address and port you started."
+          },
+          {
+            "id": "apiKey",
+            "label": "API Key",
+            "type": "password",
+            "placeholder": "Optional",
+            "required": false,
+            "helpText": "Some local servers use a bearer token; leave blank if yours does not."
+          },
+          {
+            "id": "modelParams",
+            "label": "Model Params",
+            "type": "textarea",
+            "rows": 3,
+            "placeholder": "--model qwen3.5 --temperature 0.2 --max_tokens 2048",
+            "required": false
+          },
+          {
+            "id": "serverParams",
+            "label": "Server Params",
+            "type": "textarea",
+            "rows": 3,
+            "placeholder": "--url http://127.0.0.1:8000/v1 --api-key mytoken",
+            "required": false,
+            "helpText": "Optional server/transport args. Supports --url/--base-url/--address and --api-key."
+          }
+        ]
+      },
+      "notes": [
+        "vLLM exposes an OpenAI-compatible server and official model discovery via /models.",
+        "llama.cpp server exposes an OpenAI-compatible chat completions endpoint; model discovery varies by server build."
+      ],
+      "capabilities": {
+        "requestOverrides": {
+          "supported": true
+        }
+      },
+      "models": [
+        {
+          "id": "local-openai-generic-reasoning",
+          "label": "Generic Local Reasoning",
+          "match": [
+            "qwen*",
+            "qwq*",
+            "deepseek*",
+            "r1*",
+            "gpt-oss*",
+            "gpt-oss-*",
+            "gpt-oss 120*",
+            "openai/gpt-oss-*"
+          ],
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true,
+              "outputChannel": "inline",
+              "parameterMode": "prompt_hint",
+              "defaultEnabled": false
+            },
+            "requestOverrides": {
+              "supported": true
+            }
+          },
+          "notes": [
+            "Use request overrides for server-specific settings such as vendor-specific max context or draft-model options."
+          ]
+        },
+        {
+          "id": "local-openai-vision",
+          "label": "Generic Vision Alias",
+          "match": [
+            "*-vl*",
+            "*vision*",
+            "pixtral*"
+          ],
+          "capabilities": {
+            "modalities": {
+              "vision": true
+            }
+          }
+        }
+      ]
+    },
+    "opencode": {
+      "kind": "runtime",
+      "label": "OpenCode",
+      "description": "OpenCode external runtime using your installed OpenCode CLI, server API, and provider environment.",
+      "catalog": [],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. opencode/gpt-5-codex or openrouter/qwen/qwen3-32b",
+        "customModelHelp": "Model values are stored as full provider/model IDs from OpenCode discovery.",
+        "connectionFields": []
+      },
+      "providerCapabilities": {
+        "supportsPersistentThreads": true,
+        "supportsWorkspaceExecution": true,
+        "supportsFileChanges": true,
+        "supportsCommandExecution": true,
+        "supportsStreamingEvents": false,
+        "supportsExternalAuth": true
+      },
+      "runtime": {
+        "reasoning": {
+          "enabled": false
+        }
+      },
+      "capabilities": {
+        "modalities": {
+          "text": true,
+          "vision": false,
+          "audioInput": false,
+          "audioOutput": false
+        }
+      },
+      "notes": [
+        "Connect providers and credentials inside OpenCode itself; LocalAgent does not store OpenCode provider secrets.",
+        "OpenCode recommends WSL on Windows, but native detection still works when the CLI is installed.",
+        "Saved model IDs use the full provider/model form returned by OpenCode discovery."
+      ],
+      "models": []
+    },
+    "local-codex": {
+      "kind": "runtime",
+      "label": "Codex",
+      "description": "Direct Codex model access using the native Codex sign-in.",
+      "catalog": [
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5",
+        "gpt-5.4",
+        "gpt-5.4-mini"
+      ],
+      "settings": {
+        "supportsModes": false,
+        "supportsCustomModel": true,
+        "supportsModelDiscovery": true,
+        "supportsRequestOverrides": false,
+        "customModelLabel": "Manual Model ID",
+        "customModelPlaceholder": "e.g. gpt-5.2-codex",
+        "customModelHelp": "Use this for newly available Codex-capable models not listed yet.",
+        "connectionFields": []
+      },
+      "providerCapabilities": {
+        "supportsPersistentThreads": false,
+        "supportsWorkspaceExecution": false,
+        "supportsFileChanges": false,
+        "supportsCommandExecution": false,
+        "supportsStreamingEvents": true,
+        "supportsLoginStatus": true
+      },
+      "runtime": {
+        "reasoning": {
+          "enabled": true,
+          "effort": "medium"
+        },
+        "contextWindow": {
+          "value": 258400
+        }
+      },
+      "capabilities": {
+        "reasoning": {
+          "supported": true,
+          "toggle": true,
+          "effortLevels": [
+            "low",
+            "medium",
+            "high",
+            "xhigh"
+          ],
+          "outputChannel": "separate",
+          "parameterMode": "openai_reasoning_effort",
+          "defaultEnabled": true
+        },
+        "contextWindow": {
+          "supported": true,
+          "configurable": false,
+          "max": 258400
+        },
+        "modalities": {
+          "vision": true
+        }
+      },
+      "notes": [
+        "Codex manages sign-in and refresh; LocalAgent does not persist a duplicate access token.",
+        "LocalAgent owns conversation history and executes its normal scoped tools."
+      ],
+      "models": []
+    }
+  }
+}

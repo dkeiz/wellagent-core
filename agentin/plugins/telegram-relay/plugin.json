@@ -1,0 +1,95 @@
+{
+  "id": "telegram-relay",
+  "name": "Telegram Plugin",
+  "version": "1.0.0",
+  "description": "Personal Telegram bot relay wired to LocalAgent sessions",
+  "main": "main.js",
+  "configSchema": {
+    "botToken": {
+      "type": "password",
+      "secret": true,
+      "description": "Telegram bot token from BotFather. Create one at https://t.me/BotFather"
+    },
+    "telegramReadingEnabled": {
+      "type": "boolean",
+      "description": "Enable Telegram polling and message handling"
+    },
+    "duplicateTelegramChat": {
+      "type": "boolean",
+      "description": "Duplicate Telegram messages visibly in local chat timeline"
+    },
+    "ownerChatId": {
+      "type": "string",
+      "description": "Owner Telegram chat id (auto-bound on first private interaction)"
+    },
+    "mtprotoEnabled": {
+      "type": "boolean",
+      "description": "Enable direct MTProto transport for individual Telegram messaging"
+    },
+    "mtprotoMode": {
+      "type": "select",
+      "description": "User session is the direct individual-messaging mode. Bot session keeps MTProto bot auth available too.",
+      "options": [
+        { "value": "user", "label": "User session" },
+        { "value": "bot", "label": "Bot session" }
+      ]
+    },
+    "apiId": {
+      "type": "string",
+      "description": "Telegram API ID from https://my.telegram.org/apps"
+    },
+    "apiHash": {
+      "type": "password",
+      "secret": true,
+      "description": "Telegram API hash from https://my.telegram.org/apps"
+    },
+    "phoneNumber": {
+      "type": "string",
+      "description": "Phone number for MTProto user login, for example +15551234567"
+    },
+    "sessionString": {
+      "type": "password",
+      "secret": true,
+      "description": "Saved MTProto session string used for reconnecting without logging in again"
+    },
+    "defaultPeer": {
+      "type": "string",
+      "description": "Default @username, phone number, or saved dialog target for MTProto send"
+    },
+    "proxyType": {
+      "type": "select",
+      "description": "Proxy used by the MTProto connection",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "socks5", "label": "SOCKS5" },
+        { "value": "mtproxy", "label": "MTProxy" }
+      ]
+    },
+    "proxyHost": {
+      "type": "string",
+      "description": "Proxy hostname or IP"
+    },
+    "proxyPort": {
+      "type": "number",
+      "description": "Proxy port"
+    },
+    "proxyUsername": {
+      "type": "string",
+      "description": "SOCKS5 username, if required"
+    },
+    "proxyPassword": {
+      "type": "password",
+      "secret": true,
+      "description": "SOCKS5 password, if required"
+    },
+    "proxySecret": {
+      "type": "password",
+      "secret": true,
+      "description": "MTProto proxy secret"
+    },
+    "proxyTimeoutSec": {
+      "type": "number",
+      "description": "Proxy connect timeout in seconds"
+    }
+  }
+}

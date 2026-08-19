@@ -1,0 +1,6 @@
+runtime/
+python_backend/output/
+python_backend/uploads/
+python_backend/voices/
+python_backend/.hf_cache/
+python_backend/models/

@@ -1,0 +1,15 @@
+{
+  "name": "System Health Check (copy)",
+  "description": "Checks app stats and current time — quick system overview",
+  "trigger_pattern": "system health check status",
+  "tool_chain": [
+    {
+      "tool": "get_stats",
+      "params": {}
+    },
+    {
+      "tool": "current_time",
+      "params": {}
+    }
+  ]
+}

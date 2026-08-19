@@ -1,0 +1,1 @@
+Return strict JSON only when requested by the task contract.

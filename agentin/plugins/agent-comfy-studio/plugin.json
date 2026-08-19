@@ -1,0 +1,15 @@
+{
+  "id": "agent-comfy-studio",
+  "name": "ComfyUI Studio",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "ComfyUI integration tools — generate, queue, poll, extract, and manage image workflows.",
+  "agentSlug": "comfyui-studio",
+  "configSchema": {
+    "comfyui_url": {
+      "type": "string",
+      "description": "ComfyUI server URL (default: http://127.0.0.1:8188)",
+      "required": false
+    }
+  }
+}

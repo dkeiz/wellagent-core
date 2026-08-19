@@ -1,0 +1,8 @@
+{
+  "id": "agent-setup-superagent",
+  "name": "Setup Superagent UI",
+  "version": "1.0.0",
+  "description": "Agent chat UI for setup assessment, safe setup actions, and incremental onboarding guidance.",
+  "main": "main.js",
+  "agentSlug": "setup-superagent"
+}

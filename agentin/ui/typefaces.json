@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "typefaces": [
+    {
+      "id": "current",
+      "label": "Current UI",
+      "family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif"
+    },
+    {
+      "id": "terminal",
+      "label": "Terminal",
+      "family": "\"Consolas\", \"Monaco\", \"Courier New\", monospace"
+    }
+  ]
+}

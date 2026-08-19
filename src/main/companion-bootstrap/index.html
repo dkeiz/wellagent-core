@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LocalAgent Companion Setup</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #eef3fb;
+    --panel: rgba(255,255,255,0.94);
+    --line: rgba(23,34,56,0.12);
+    --text: #172238;
+    --muted: #65748b;
+    --accent: #216fce;
+    --accent-soft: rgba(33,111,206,0.1);
+    --warning: #b97700;
+    --danger: #c74848;
+    --radius: 22px;
+    --shadow: 0 18px 44px rgba(20,32,56,0.11);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font: 16px/1.5 "Segoe UI", "SF Pro Text", sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at top right, rgba(33,111,206,0.16), transparent 30%),
+      linear-gradient(180deg, #f8fbff 0%, var(--bg) 54%, #e4ebf6 100%);
+  }
+  main {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+  .card {
+    width: min(100%, 720px);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+  }
+  .brand {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .brand-mark {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 1.45rem;
+    background: linear-gradient(135deg, #172238, #335381);
+  }
+  h1, h2, p { margin: 0; }
+  .lede { color: var(--muted); margin-top: 4px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    background: rgba(255,255,255,0.84);
+  }
+  .kicker {
+    display: inline-flex;
+    padding: 0.24rem 0.56rem;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  ol {
+    margin: 12px 0 0;
+    padding-left: 1.2rem;
+  }
+  li + li { margin-top: 10px; }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .btn {
+    appearance: none;
+    border: 0;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 140ms ease, opacity 140ms ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary {
+    background: linear-gradient(135deg, #0f5fc1, var(--accent));
+    color: #fff;
+  }
+  .btn-secondary {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .btn[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .meta {
+    display: grid;
+    gap: 10px;
+    font-size: 0.94rem;
+  }
+  .meta strong { display: block; }
+  .mono {
+    font-family: Consolas, "SFMono-Regular", monospace;
+    word-break: break-all;
+  }
+  .note {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(185,119,0,0.08);
+    color: #7e5606;
+  }
+  .error {
+    background: rgba(199,72,72,0.08);
+    color: var(--danger);
+  }
+  .hidden { display: none !important; }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    .card { padding: 22px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <div class="brand">
+      <div class="brand-mark">🛰</div>
+      <div>
+        <h1>LocalAgent Companion Secure Setup</h1>
+        <p class="lede">Install the local companion certificate, then continue into the secure companion for microphone access.</p>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <span class="kicker" id="platform-kicker">Browser Setup</span>
+        <h2 id="platform-title">Checking this device…</h2>
+        <ol id="steps-list"></ol>
+        <div class="actions">
+          <a id="ca-link" class="btn btn-secondary" href="#" download="LocalAgent-Companion-CA.crt" aria-disabled="true">Download CA</a>
+          <a id="android-settings-link" class="btn btn-secondary hidden" href="intent:#Intent;action=android.settings.SECURITY_SETTINGS;end;">Open Android Security Settings</a>
+          <a id="secure-link" class="btn btn-primary" href="#" aria-disabled="true">Open Secure Companion</a>
+        </div>
+        <div id="warning-box" class="note hidden"></div>
+      </section>
+
+      <section class="panel">
+        <span class="kicker">Connection</span>
+        <div class="meta">
+          <div>
+            <strong>Pairing code</strong>
+            <div id="pairing-code" class="mono">No active code in this link</div>
+          </div>
+          <div>
+            <strong>Secure address</strong>
+            <div id="secure-url" class="mono">Not ready yet</div>
+          </div>
+          <div>
+            <strong>Certificate file</strong>
+            <div id="ca-url" class="mono">Not ready yet</div>
+          </div>
+        </div>
+        <div id="status-box" class="note">Checking desktop HTTPS setup…</div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const ua = String(navigator.userAgent || '').toLowerCase();
+  const isAndroid = /android/.test(ua);
+  const isAppleMobile = /iphone|ipad|ipod/.test(ua);
+  const params = new URLSearchParams(location.search);
+  const queryCode = params.get('code') || params.get('pairingCode') || '';
+
+  const els = {
+    platformKicker: document.getElementById('platform-kicker'),
+    platformTitle: document.getElementById('platform-title'),
+    stepsList: document.getElementById('steps-list'),
+    caLink: document.getElementById('ca-link'),
+    androidSettingsLink: document.getElementById('android-settings-link'),
+    secureLink: document.getElementById('secure-link'),
+    warningBox: document.getElementById('warning-box'),
+    pairingCode: document.getElementById('pairing-code'),
+    secureUrl: document.getElementById('secure-url'),
+    caUrl: document.getElementById('ca-url'),
+    statusBox: document.getElementById('status-box')
+  };
+
+  const stepSets = {
+    android: [
+      'Tap Download CA and save the certificate file to this phone.',
+      'Tap Open Android Security Settings.',
+      'Choose Encryption & credentials, then Install a certificate, then CA certificate.',
+      'Pick the downloaded LocalAgent certificate from Downloads.',
+      'Return here and tap Open Secure Companion, then allow microphone permission in the browser.'
+    ],
+    ios: [
+      'Tap Download CA and save the certificate or profile to this device.',
+      'Install it from iPhone or iPad Settings, then enable full trust for the manually installed root certificate.',
+      'Return here and open the secure companion, then allow microphone permission in Safari.'
+    ],
+    generic: [
+      'Download the local companion CA certificate to this device.',
+      'Install and trust it using this browser and operating system certificate flow.',
+      'Open the secure companion and allow microphone permission when the browser asks.'
+    ]
+  };
+
+  function applySteps(kind) {
+    const steps = stepSets[kind] || stepSets.generic;
+    els.stepsList.innerHTML = steps.map(step => `<li>${step}</li>`).join('');
+    if (kind === 'android') {
+      els.platformKicker.textContent = 'Android Browser';
+      els.platformTitle.textContent = 'Android secure companion setup';
+      els.androidSettingsLink.classList.remove('hidden');
+    } else if (kind === 'ios') {
+      els.platformKicker.textContent = 'iPhone / iPad';
+      els.platformTitle.textContent = 'Manual certificate trust is required on Safari';
+      els.androidSettingsLink.classList.add('hidden');
+    } else {
+      els.platformKicker.textContent = 'Browser Setup';
+      els.platformTitle.textContent = 'Secure companion setup';
+      els.androidSettingsLink.classList.add('hidden');
+    }
+  }
+
+  function setLink(link, href, enabled) {
+    link.href = enabled ? href : '#';
+    link.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+  }
+
+  // If already on HTTPS, no setup needed
+  if (location.protocol === 'https:') {
+    document.getElementById('secure-link')?.remove();
+    els.platformTitle.textContent = 'Connected via HTTPS';
+    els.stepsList.innerHTML = '<li>HTTPS is active. Microphone access is available.</li>';
+    els.statusBox.textContent = 'Your connection is secured.';
+    els.statusBox.classList.remove('error');
+    setLink(els.caLink, '', false);
+  }
+
+  async function loadStatus() {
+    els.pairingCode.textContent = queryCode || 'No active code in this link';
+    applySteps(isAndroid ? 'android' : (isAppleMobile ? 'ios' : 'generic'));
+
+    try {
+      const response = await fetch(`/companion/bootstrap/status${location.search || ''}`);
+      const payload = await response.json();
+      if (!response.ok || payload?.success === false) {
+        throw new Error(payload?.error || `HTTP ${response.status}`);
+      }
+
+      const secureUrl = String(payload.secureUrl || '').trim();
+      const caUrl = String(payload.caUrl || '').trim();
+      const warning = String(payload.warning || '').trim();
+
+      els.secureUrl.textContent = secureUrl || 'Secure companion is not ready yet';
+      els.caUrl.textContent = caUrl || 'Certificate download is not ready yet';
+      els.statusBox.textContent = payload.ready
+        ? 'Desktop HTTPS is ready. Install the CA once on this device, then open the secure companion.'
+        : (warning || 'Desktop HTTPS is not ready yet. Run HTTPS setup on the desktop first.');
+      els.statusBox.classList.toggle('error', !payload.ready);
+
+      setLink(els.caLink, caUrl, Boolean(caUrl));
+      setLink(els.secureLink, secureUrl, Boolean(secureUrl && payload.ready));
+
+      els.warningBox.textContent = warning;
+      els.warningBox.classList.toggle('hidden', !warning);
+      els.warningBox.classList.toggle('error', !payload.ready);
+
+      // Do not auto-redirect on first visit. Phones must install/trust the CA
+      // before Chrome can open the local HTTPS companion without an interstitial.
+    } catch (error) {
+      els.statusBox.textContent = error.message || 'Failed to load companion HTTPS status.';
+      els.statusBox.classList.add('error');
+      els.warningBox.textContent = 'Open desktop Settings → Companion → Advanced and run HTTPS setup, then refresh this page.';
+      els.warningBox.classList.remove('hidden');
+      els.warningBox.classList.add('error');
+    }
+  }
+
+  // If currently on HTTP, poll only to update the setup buttons.
+  if (location.protocol !== 'https:') {
+    loadStatus();
+    setInterval(loadStatus, 3000);
+  }
+})();
+</script>
+</body>
+</html>

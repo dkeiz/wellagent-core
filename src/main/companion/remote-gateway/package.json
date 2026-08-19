@@ -1,0 +1,11 @@
+{
+  "name": "localagent-remote-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted LocalAgent companion relay gateway.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

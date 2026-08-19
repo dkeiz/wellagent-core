@@ -1,0 +1,9 @@
+{
+  "id": "agent-book-writer",
+  "name": "Writing Studio",
+  "version": "1.0.0",
+  "main": "writing-studio-main.js",
+  "description": "Writing studio workspace - manage books, web articles, and structured notes across multiple projects.",
+  "agentSlug": "writing-studio",
+  "agentSlugs": ["book-writer"]
+}

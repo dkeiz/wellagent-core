@@ -1,0 +1,1 @@
+[PRIVATE MODE] No memory writes allowed. User wants to test ephemeral behavior.

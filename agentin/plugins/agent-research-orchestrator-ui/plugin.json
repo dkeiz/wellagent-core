@@ -1,0 +1,8 @@
+{
+  "id": "agent-research-orchestrator-ui",
+  "name": "Research Orchestrator UI",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Adds research-specific planning, output, and chart widgets to the Research Orchestrator chat tab.",
+  "agentSlug": "research-orchestrator"
+}

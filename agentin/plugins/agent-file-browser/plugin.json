@@ -1,0 +1,14 @@
+{
+  "id": "agent-file-browser",
+  "name": "Agent File Browser",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Adds an artifacts and owned files panel to selected agent chat tabs.",
+  "agentSlugs": [
+    "web-researcher",
+    "code-reviewer",
+    "file-manager",
+    "system-monitor",
+    "research-orchestrator"
+  ]
+}

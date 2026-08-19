@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>LocalAgent Companion</title>
+<script>
+window.addEventListener('error', function (event) {
+  var target = document.getElementById('auth-err');
+  if (target) target.textContent = 'Companion page failed to start: ' + (event.message || 'unknown error');
+});
+</script>
+<link rel="stylesheet" href="/companion/web/assets/styles.css">
+<link rel="stylesheet" href="/companion/web/assets/skin-bridge.css">
+<link id="companion-parity-link" rel="stylesheet" href="/companion/web/assets/companion-parity.css">
+<link rel="stylesheet" href="/companion/web/assets/app-install.css">
+</head>
+<body>
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="auth-orbit">🛰</span>
+      <div>
+        <h1>LocalAgent Companion</h1>
+        <p>Pair this browser with your desktop app.</p>
+      </div>
+    </div>
+    <label class="auth-field">
+      <span>Pairing code</span>
+      <input id="pair-code" type="text" placeholder="6-digit pairing code" autocomplete="one-time-code" inputmode="numeric" maxlength="6">
+    </label>
+    <p class="auth-device-note">This browser will be named automatically after pairing.</p>
+    <button id="auth-btn" class="primary-btn">Pair &amp; Connect</button>
+    <div id="auth-err" class="auth-error"></div>
+  </div>
+</div>
+
+<div id="app-shell" class="app-shell" hidden>
+  <div id="shell-overlay" class="shell-overlay" hidden></div>
+
+  <aside id="left-sidebar" class="sidebar sidebar-left">
+    <div class="sidebar-header">
+      <div>
+        <div class="sidebar-kicker">Companion</div>
+        <h2>Workspace</h2>
+      </div>
+      <button id="close-left-sidebar-btn" class="ghost-btn icon-only" type="button">×</button>
+    </div>
+
+    <section class="sidebar-section">
+      <div class="sidebar-section-head">
+        <h3>Chats</h3>
+        <button id="new-session-btn" class="secondary-btn compact-btn" type="button">New</button>
+      </div>
+      <div id="session-list" class="session-list"></div>
+    </section>
+
+    <section class="sidebar-section">
+      <div class="sidebar-section-head">
+        <h3>Agents</h3>
+        <button id="refresh-agents-btn" class="ghost-btn compact-btn" type="button">Refresh</button>
+      </div>
+      <div id="agent-list" class="agent-list"></div>
+    </section>
+  </aside>
+
+  <main class="main-shell">
+    <header class="topbar">
+      <div class="topbar-main">
+        <button id="toggle-left-sidebar-btn" class="ghost-btn icon-only" type="button">☰</button>
+        <div class="brand-block">
+          <div class="brand-row">
+            <span id="ws-status" class="status-dot offline"></span>
+            <strong>LocalAgent Companion</strong>
+            <span id="layout-badge" class="layout-badge">Mobile Web</span>
+          </div>
+          <div id="topbar-subtitle" class="topbar-subtitle">Not connected</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button id="toggle-right-sidebar-btn" class="ghost-btn" type="button">Controls</button>
+        <button id="logout-btn" class="ghost-btn" type="button">Logout</button>
+      </div>
+    </header>
+
+    <section class="headline-strip">
+      <div id="active-session-title" class="headline-card">No session selected</div>
+      <div id="model-summary" class="headline-card">Model: —</div>
+      <div id="capability-summary" class="headline-card">Tools: —</div>
+    </section>
+
+    <section id="toast-stack" class="toast-stack" aria-live="polite"></section>
+
+    <section id="message-list" class="message-list"></section>
+
+    <div id="drop-hint" class="drop-hint" hidden>Drop files to upload into this session</div>
+
+    <section class="composer-shell">
+      <div class="composer-toolbar">
+        <button id="attach-btn" class="secondary-btn compact-btn" type="button">Attach</button>
+        <button id="voice-btn" class="secondary-btn compact-btn" type="button">Mic</button>
+        <button id="artifact-shortcut-btn" class="secondary-btn compact-btn" type="button">Artifacts</button>
+        <button id="scroll-bottom-btn" class="ghost-btn compact-btn" type="button">Bottom</button>
+      </div>
+      <div class="composer-row">
+        <textarea id="composer-input" rows="2" placeholder="Type a message or /command..."></textarea>
+        <div class="composer-actions">
+          <button id="send-btn" class="primary-btn" type="button">Send</button>
+          <button id="stop-btn" class="danger-btn" type="button" hidden>Stop</button>
+        </div>
+      </div>
+      <input id="file-input" type="file" multiple hidden>
+    </section>
+  </main>
+
+  <aside id="right-sidebar" class="sidebar sidebar-right">
+    <div class="sidebar-header">
+      <div>
+        <div class="sidebar-kicker">Companion</div>
+        <h2>Controls</h2>
+      </div>
+      <button id="close-right-sidebar-btn" class="ghost-btn icon-only" type="button">×</button>
+    </div>
+
+    <section class="sidebar-section">
+      <div class="sidebar-section-head">
+        <h3>Quick Controls</h3>
+        <button id="refresh-snapshot-btn" class="ghost-btn compact-btn" type="button">Refresh</button>
+      </div>
+      <div class="status-grid">
+        <div class="status-tile"><span>Thinking</span><strong id="thinking-value">—</strong></div>
+        <div class="status-tile"><span>Tools</span><strong id="tools-value">—</strong></div>
+        <div class="status-tile"><span>Memory</span><strong id="memory-value">—</strong></div>
+        <div class="status-tile"><span>Workflow</span><strong id="workflow-value">—</strong></div>
+        <div class="status-tile"><span>Devices</span><strong id="devices-value">—</strong></div>
+      </div>
+      <div class="quick-actions">
+        <button id="toggle-thinking-btn" class="secondary-btn compact-btn" type="button">Toggle Thinking</button>
+        <button id="toggle-tools-btn" class="secondary-btn compact-btn" type="button">Toggle Tools</button>
+        <button id="toggle-memory-btn" class="secondary-btn compact-btn" type="button">Memory Daemon</button>
+        <button id="toggle-workflow-btn" class="secondary-btn compact-btn" type="button">Workflow Daemon</button>
+      </div>
+    </section>
+
+    <section class="sidebar-section">
+      <div class="sidebar-section-head">
+        <h3>Capability Groups</h3>
+      </div>
+      <div id="capability-group-list" class="capability-group-list"></div>
+    </section>
+
+    <section class="sidebar-section">
+      <div class="sidebar-section-head">
+        <h3>Activity</h3>
+        <button id="refresh-activity-btn" class="ghost-btn compact-btn" type="button">Refresh</button>
+      </div>
+      <div id="permission-request-list" class="permission-request-list"></div>
+      <div id="task-queue-list" class="task-queue-list"></div>
+      <div id="activity-list" class="activity-list"></div>
+    </section>
+
+    <section class="sidebar-section">
+      <div class="sidebar-section-head">
+        <h3>Artifacts</h3>
+        <button id="refresh-artifacts-btn" class="ghost-btn compact-btn" type="button">Refresh</button>
+      </div>
+      <div id="artifact-list" class="artifact-list"></div>
+    </section>
+  </aside>
+</div>
+
+<dialog id="artifact-dialog" class="artifact-dialog">
+  <div class="artifact-dialog-head">
+    <strong id="artifact-dialog-title">Artifact</strong>
+    <button id="close-artifact-dialog-btn" class="ghost-btn icon-only" type="button">×</button>
+  </div>
+  <div id="artifact-dialog-body" class="artifact-dialog-body"></div>
+</dialog>
+
+<script src="/companion/web/assets/client.js"></script>
+<script src="/companion/web/assets/utils.js"></script>
+<script src="/companion/web/assets/message-renderer.js"></script>
+<script src="/companion/web/assets/ui-state.js"></script>
+<script src="/companion/web/assets/activity.js"></script>
+<script src="/companion/web/assets/updates.js"></script>
+<script src="/companion/web/assets/voice.js"></script>
+<script src="/companion/web/assets/voice-input.js?v=2"></script>
+<script src="/companion/web/assets/app-install.js"></script>
+<script src="/companion/web/assets/app.js"></script>
+</body>
+</html>

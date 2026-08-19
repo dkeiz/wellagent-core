@@ -1,0 +1,126 @@
+{
+  "version": 2,
+  "mainSwitch": {
+    "enabled": true,
+    "description": "Master switch for all tools"
+  },
+  "safeTools": {
+    "description": "Always available when main switch is ON",
+    "tools": [
+      "current_time",
+      "get_stats",
+      "calculate",
+      "get_current_provider",
+      "get_system_prompt",
+      "list_active_rules",
+      "conversation_history",
+      "subagent",
+      "search_conversations",
+      "search_web_bing",
+      "fetch_url",
+      "inner_browser",
+      "workflow_op",
+      "research_op",
+      "display_content",
+      "image",
+      "calendar_op",
+      "todo_op",
+      "timer",
+      "read_file",
+      "list_directory",
+      "file_exists",
+      "end_answer",
+      "automemory",
+      "explore_knowledge",
+      "screenshot"
+    ]
+  },
+  "groups": {
+    "unsafe": {
+      "name": "Unsafe Tools",
+      "description": "Tools that can modify agent behavior",
+      "icon": "🔴",
+      "enabled": false,
+      "tools": [
+        "create_tool",
+        "toggle_rule",
+        "modify_system_prompt",
+        "manage_rule",
+        "list_rules"
+      ]
+    },
+    "web": {
+      "name": "Web Search",
+      "description": "Internet search and data fetching",
+      "icon": "🌐",
+      "enabled": true,
+      "tools": [
+        "search_web_bing",
+        "fetch_url",
+        "inner_browser"
+      ]
+    },
+    "files": {
+      "name": "File Operations",
+      "description": "Read and write files on disk",
+      "icon": "📁",
+      "mode": "full",
+      "modes": {
+        "off": [],
+        "read": [
+          "read_file",
+          "list_directory",
+          "file_exists",
+          "image"
+        ],
+        "full": [
+          "read_file",
+          "list_directory",
+          "file_exists",
+          "image",
+          "edit_file",
+          "write_file",
+          "delete_file",
+          "execution_root"
+        ]
+      }
+    },
+    "terminal": {
+      "name": "Terminal",
+      "description": "Execute shell commands",
+      "icon": "💻",
+      "mode": "system",
+      "modes": {
+        "off": [],
+        "workspace": [
+          "run_command"
+        ],
+        "system": [
+          "run_command"
+        ]
+      }
+    },
+    "ports": {
+      "name": "Connectors & Ports",
+      "description": "External service connectors and HTTP/WebSocket listeners",
+      "icon": "🔌",
+      "enabled": true,
+      "tools": [
+        "connector_op",
+        "a2a_op"
+      ],
+      "listeners": []
+    },
+    "visual": {
+      "name": "Visual Capture",
+      "description": "External monitor and application capture permission",
+      "icon": "📸",
+      "enabled": false,
+      "tools": []
+    }
+  },
+  "customTools": {
+    "description": "User-created tools default to unsafe, can be promoted",
+    "defaultSafe": false
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "id": "pixel-avatar",
+  "name": "Pixel Avatar",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Animated pixel avatar in the right sidebar — reacts to chat messages with emotion-driven animations.",
+  "configSchema": {
+    "avatarPreset": {
+      "type": "select",
+      "label": "Avatar",
+      "default": "generated-cat",
+      "options": [
+        { "value": "generated-cat", "label": "Canvas cat" },
+        { "value": "generated-robot", "label": "Canvas robot" },
+        { "value": "generated-girl", "label": "Canvas girl" },
+        { "value": "pixel-cat", "label": "Pixel cat" },
+        { "value": "pixel-default", "label": "Pixel default" }
+      ],
+      "required": false
+    },
+    "canvasSize": {
+      "type": "select",
+      "label": "Avatar Size",
+      "default": "160",
+      "options": [
+        { "value": "128", "label": "Small 128px" },
+        { "value": "160", "label": "Normal 160px" },
+        { "value": "200", "label": "Large 200px" },
+        { "value": "240", "label": "XL 240px" }
+      ],
+      "required": false
+    },
+    "emotionPreset": {
+      "type": "select",
+      "label": "Emotion Mode",
+      "default": "balanced",
+      "options": [
+        { "value": "balanced", "label": "Balanced" },
+        { "value": "expressive", "label": "Expressive" },
+        { "value": "markers", "label": "Manual markers" },
+        { "value": "neutral", "label": "Quiet neutral" }
+      ],
+      "required": false
+    },
+    "exposeExternalSkill": {
+      "type": "boolean",
+      "display": "toggle",
+      "control": "toggle",
+      "label": "Expose avatar.md Skill",
+      "description": "Create agentin/skills/avatar.md so the LLM can see the avatar emotion protocol. Leave off to keep emotion parsing automatic only.",
+      "default": false,
+      "required": false
+    }
+  }
+}

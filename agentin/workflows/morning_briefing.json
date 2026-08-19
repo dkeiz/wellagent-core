@@ -1,0 +1,10 @@
+{
+  "name": "Morning Briefing",
+  "description": "Lists today's calendar events, pending todos, and a weather API snapshot",
+  "trigger_pattern": "morning briefing daily summary",
+  "tool_chain": [
+    { "tool": "calendar_op", "params": { "action": "list", "limit": 5 } },
+    { "tool": "todo_op", "params": { "action": "list" } },
+    { "tool": "fetch_url", "params": { "url": "https://wttr.in/Moscow?format=j1" } }
+  ]
+}

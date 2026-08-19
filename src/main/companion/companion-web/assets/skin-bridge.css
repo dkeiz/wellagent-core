@@ -1,0 +1,18 @@
+:root {
+  --primary-color: var(--accent);
+  --primary-hover: var(--accent-strong);
+  --border-color: var(--line);
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--panel-soft);
+  --bg-tertiary: var(--panel);
+  --card-bg: var(--panel);
+  --input-bg: var(--panel-strong);
+  --text-primary: var(--text);
+  --text-secondary: var(--muted);
+  --sidebar-bg: var(--panel);
+  --skin-main-bg: var(--bg);
+  --skin-sidebar-bg: var(--panel);
+  --skin-input-bg: var(--panel-strong);
+  --skin-hover-bg: var(--accent-soft);
+  --skin-text-muted: var(--muted);
+}

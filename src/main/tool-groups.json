@@ -1,0 +1,117 @@
+{
+    "groups": {
+        "web": {
+            "name": "Web",
+            "description": "Internet search and URL fetching",
+            "icon": "🌐",
+            "tools": [
+                "search_web_bing",
+                "fetch_url",
+                "inner_browser"
+            ],
+            "defaultActive": true
+        },
+        "terminal": {
+            "name": "Terminal",
+            "description": "Execute shell commands",
+            "icon": "💻",
+            "tools": [
+                "run_command"
+            ],
+            "defaultActive": true
+        },
+        "files": {
+            "name": "Files",
+            "description": "Read and write files on disk",
+            "icon": "📁",
+            "tools": [
+                "read_file",
+                "write_file",
+                "edit_file",
+                "list_directory",
+                "file_exists",
+                "delete_file"
+            ],
+            "defaultActive": true
+        },
+        "system": {
+            "name": "System",
+            "description": "Time, stats, utilities",
+            "icon": "⚙️",
+            "tools": [
+                "current_time",
+                "get_stats",
+                "calculate",
+                "get_current_provider",
+                "end_answer"
+            ],
+            "defaultActive": true
+        },
+        "agent": {
+            "name": "Agent",
+            "description": "Conversations, rules, calendar, todos, workflows",
+            "icon": "🤖",
+            "tools": [
+                "conversation_history",
+                "search_conversations",
+                "subagent",
+                "display_content",
+                "get_system_prompt",
+                "list_active_rules",
+                "toggle_rule",
+                "calendar_op",
+                "todo_op",
+                "timer",
+                "automemory",
+                "workflow_op",
+                "research_op"
+            ],
+            "defaultActive": true
+        },
+        "media": {
+            "name": "Media",
+            "description": "Screenshots, images, audio, video",
+            "icon": "🎬",
+            "tools": [
+                "open_media",
+                "play_audio",
+                "image",
+                "screenshot"
+            ],
+            "defaultActive": false
+        },
+        "unsafe": {
+            "name": "Unsafe",
+            "description": "Tools that can modify agent behavior",
+            "icon": "🔴",
+            "tools": [
+                "create_tool",
+                "modify_system_prompt",
+                "manage_rule",
+                "list_rules"
+            ],
+            "defaultActive": false
+        },
+        "connectors": {
+            "name": "Connectors & Ports",
+            "description": "External service connectors and listeners",
+            "icon": "🔌",
+            "tools": [
+                "connector_op",
+                "a2a_op"
+            ],
+            "defaultActive": true
+        },
+        "workspace": {
+            "name": "Workspace",
+            "description": "Session temp files, command output logs",
+            "icon": "📂",
+        "tools": [
+                "list_workspace",
+                "search_workspace",
+                "execution_root"
+            ],
+            "defaultActive": true
+        }
+    }
+}

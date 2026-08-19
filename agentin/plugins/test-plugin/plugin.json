@@ -1,0 +1,10 @@
+{
+  "id": "test-plugin",
+  "name": "Test Plugin",
+  "version": "1.0.0",
+  "description": "A minimal test plugin to validate the plugin system",
+  "main": "main.js",
+  "configSchema": {
+    "greeting": { "type": "string", "description": "Custom greeting message" }
+  }
+}

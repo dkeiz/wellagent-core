@@ -1,0 +1,14 @@
+{
+  "id": "agent-coding",
+  "name": "Coding Superagent",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "Durable plan/phase tracking tool and a passive progress panel for the Coding agent.",
+  "agentSlug": "coding",
+  "tools": {
+    "unprefixed": ["coding_plan"]
+  },
+  "runtimePermissions": {
+    "profile": "plugin-strict"
+  }
+}

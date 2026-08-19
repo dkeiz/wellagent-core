@@ -1,0 +1,24 @@
+{
+  "request": {
+    "path": "/tts",
+    "method": "POST",
+    "mode": "json",
+    "template": {
+      "text": "{text}",
+      "voice": "{voice}",
+      "speed": "{speed}"
+    }
+  },
+  "response": {
+    "audioUrlPath": "audio.url|audio_url|audioUrl|url",
+    "audioBase64Path": "audio.base64|audio_base64|audioBase64|base64",
+    "mimeTypePath": "audio.mimeType|mimeType|mime_type"
+  },
+  "voices": {
+    "path": "/voices",
+    "responsePath": "voices|data"
+  },
+  "probePath": "/health",
+  "apiKeyHeader": "Authorization",
+  "apiKeyPrefix": "Bearer "
+}

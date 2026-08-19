@@ -1,0 +1,20 @@
+{
+  "id": "lmstudio",
+  "label": "LM Studio",
+  "bridgeType": "provider",
+  "enabled": true,
+  "capabilities": {
+    "chat": true,
+    "streaming": false
+  },
+  "transport": {
+    "type": "provider"
+  },
+  "execution": {
+    "provider": "lmstudio"
+  },
+  "privacy": {
+    "localOnly": true
+  },
+  "defaults": {}
+}

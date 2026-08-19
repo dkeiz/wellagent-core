@@ -5,13 +5,35 @@ node_modules/
 dist/
 build/
 
+# Runtime state (created by the agent at runtime)
+data/
+agentin/memory/
+agentin/workspaces/
+agentin/subtasks/
+agentin/tasks/
+agentin/research/
+agentin/userabout/
+agentin/plugin-data/
+agentin/a2a/tasks/
+agentin/a2a/events/
+agentin/knowledge/library/
+agentin/knowledge/staging/
+agentin/plugins/*/node_modules/
+
 # Logs
 *.log
+*.err.log
+*.out.log
 
 # Databases
 *.db
 *.sqlite
 *.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
 
 # OS
 .DS_Store

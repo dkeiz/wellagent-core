@@ -1,0 +1,11 @@
+{
+  "name": "Live Workflow Test",
+  "description": "Workflow using: current_time",
+  "trigger_pattern": "live workflow ping",
+  "tool_chain": [
+    {
+      "tool": "current_time",
+      "params": {}
+    }
+  ]
+}
